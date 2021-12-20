@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Personal Finance Calculators</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="text/javascript" src="calc/main.js"></script>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", () => {
+        addNavBarBrand()
+        addNavBarEnd()
+        addFooter()
+      })
+    </script>
+  </head>
+  <body class="index-bg">
+    <nav class="navbar white-70h" id="navbar" role="navigation" aria-label="main navigation">
+      <div id="navbar-menu" class="navbar-menu">
+        <div class="navbar-start">
+          <a class="navbar-item" href="calc/retirement-monthly-income.html">
+            Retirement Income Calculator
+          </a>
+          <a class="navbar-item"> Take-Home Salary & Tax Calculator </a>
+        </div>
+      </div>
+    </nav>
+
+    <section class="section white-50">
+      <div class="container">
+        <h1 class="title is-1 has-text-centered">Personal Finance Calculators for Malaysia</h1>
+      </div>
+    </section>
+    <!-- https://stackoverflow.com/a/13602015 -->
+    <section
+      class="section p-0 retire-income-bg"
+      onclick="location.href='calc/retirement-monthly-income.html';"
+      style="cursor: pointer"
+    >
+      <div class="container p-6 is-fluid white-50h">
+        <div class="p-6 zoom-select">
+          <p class="title is-4 has-text-centered">Retirement Monthly Income Calculator</p>
+          <p class="subtitle is-5 has-text-centered">
+            How much you can spend monthly when you retire ?
+          </p>
+          <p class="subtitle is-5 has-text-centered">Click here to find out</p>
+        </div>
+      </div>
+    </section>
+    <section class="section p-0 take-home-salary-bg">
+      <div class="container p-6 is-fluid white-50h">
+        <div class="p-6 zoom-select">
+          <p class="title is-4 has-text-centered">Take-Home Salary & Tax Calculator</p>
+          <p class="subtitle is-5 has-text-centered">
+            How much of your salary can you take home after tax and EPF deductions ?
+          </p>
+          <p class="subtitle is-5 has-text-centered">Click here to find out</p>
+          <p class="has-text-centered">🚧 Work in progress 🚧</p>
+        </div>
+      </div>
+    </section>
+    <footer class="footer" id="footer"></footer>
+  </body>
+</html>

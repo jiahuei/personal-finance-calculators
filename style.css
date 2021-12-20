@@ -1,0 +1,100 @@
+@import "https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css";
+/* https://fontawesome.com/v5.15/how-to-use/on-the-web/using-with/jquery */
+@import "https://use.fontawesome.com/releases/v5.15.4/css/all.css";
+
+.disclaimer {
+  font-size: small;
+}
+
+.zoom-select {
+  transform: scale(1);
+  transition: transform 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+.zoom-select:hover {
+  transform: scale(1.2);
+  transition: transform 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+.white-50 {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.white-50h {
+  background-color: rgba(255, 255, 255, 0.5);
+  transition: background-color 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+.white-50h:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+  transition: background-color 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+.white-50hf {
+  background-color: rgba(255, 255, 255, 0.8);
+  transition: background-color 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+.white-50hf:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+  transition: background-color 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+.white-70h {
+  background-color: rgba(255, 255, 255, 0.7);
+  transition: background-color 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+.white-70h:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+  transition: background-color 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+.white-85h {
+  background-color: rgba(255, 255, 255, 0.85);
+  transition: background-color 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+.white-85h:hover {
+  background-color: rgba(255, 255, 255, 0.95);
+  transition: background-color 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+.index-bg {
+  background-image: url("img/Photo by Kaiyu Wu on Unsplash (HD q30).jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.retire-income-bg {
+  background-image: url("img/Photo by Michael Longmire on Unsplash (QHD q25).jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.take-home-salary-bg {
+  background-image: url("img/Photo by Annie Spratt on Unsplash (QHD q25).jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.lilac {
+  color: #c8a2c8;
+}
+
+.purple-pastel {
+  color: #c3b1e1;
+}

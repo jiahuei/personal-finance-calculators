@@ -165,7 +165,7 @@ function addNavBarEnd() {
       </a>
       <a
         class="button is-light"
-        href="https://github.com/photonea/personal-finance-calculators-alt"
+        href="https://github.com/jiahuei/personal-finance-calculators"
       >
         <span class="icon-text">
           <span class="icon">

@@ -4,8 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Retirement Monthly Income Calculator</title>
-    <link rel="stylesheet" href="../style.css" />
-    <script type="text/javascript" src="main.js"></script>
+    <!-- https://stackoverflow.com/a/42997313 -->
+    <base href="../" />
+    <link rel="stylesheet" href="style.css" />
+    <script type="text/javascript" src="calc/main.js"></script>
     <script type="text/javascript">
       function submitForm() {
         retireAge = enStringToFloat(document.getElementById("retireAgeInput").value)
@@ -60,8 +62,8 @@
     <nav class="navbar white-70h" id="navbar" role="navigation" aria-label="main navigation">
       <div id="navbar-menu" class="navbar-menu">
         <div class="navbar-start">
-          <a class="navbar-item" href="../index.html"> Home </a>
-          <a class="navbar-item" href="take-home-salary-tax.html">
+          <a class="navbar-item" href="index.html"> Home </a>
+          <a class="navbar-item" href="calc/take-home-salary-tax.html">
             Take-Home Salary & Tax Calculator
           </a>
         </div>

@@ -39,19 +39,19 @@ function intToEnString(val) {
   return intFormatter.format(val)
 }
 
-function formatStringAsEnFloat(str) {
+function formatStringAsEnFloat(str, minimum = 0, maximum = Infinity) {
   if (str == "") {
     return str
   } else {
-    return floatToEnString(enStringToFloat(str))
+    return floatToEnString(Math.min(Math.max(enStringToFloat(str), minimum), maximum))
   }
 }
 
-function formatStringAsEnInt(str) {
+function formatStringAsEnInt(str, minimum = 0, maximum = Infinity) {
   if (str == "") {
     return str
   } else {
-    return intToEnString(enStringToFloat(str))
+    return intToEnString(Math.min(Math.max(enStringToFloat(str), minimum), maximum))
   }
 }
 
@@ -90,14 +90,14 @@ function validateInputNumber(el) {
   return isNaN(val)
 }
 
-function computeMonthlyWithdrawal(retireAge, lifeExpectancy, retireSaving, dividendRate) {
+function computeMonthlyWithdrawal(retireAge, lifeExpectancy, retireSaving, dividendRatePercent) {
   console.log(`'computeMonthlyWithdrawal' inputs: 
   retireAge = ${retireAge}
   lifeExpectancy = ${lifeExpectancy}
   retireSaving = ${retireSaving}
-  dividendRate = ${dividendRate}`)
+  dividendRatePercent = ${dividendRatePercent}`)
   let n = lifeExpectancy - retireAge
-  let factor = dividendRate / 100 + 1
+  let factor = dividendRatePercent / 100 + 1
   let numerator = retireSaving * factor ** (n - 1) * (factor - 1)
   let denominator = factor ** n - 1
   let monthlyWithdraw = numerator / denominator / 12
@@ -116,7 +116,7 @@ function computeMonthlyWithdrawalSimple(retireAge, lifeExpectancy, retireSaving)
   return monthlyWithdraw
 }
 
-function toggleBurger() {
+function toggleNavBarBurger() {
   let burgerIcon = document.getElementById("navbar-burger")
   let dropMenu = document.getElementById("navbar-menu")
   burgerIcon.classList.toggle("is-active")
@@ -136,7 +136,7 @@ function addNavBarBrand() {
     class="navbar-burger"
     aria-label="menu"
     aria-expanded="false"
-    onclick="toggleBurger()"
+    onclick="toggleNavBarBurger()"
   >
     <span aria-hidden="true"></span>
     <span aria-hidden="true"></span>

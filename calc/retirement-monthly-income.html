@@ -8,10 +8,12 @@
     <script type="text/javascript" src="main.js"></script>
     <script type="text/javascript">
       function submitForm() {
-        retireAge = document.getElementById("retireAgeInput").value
-        lifeExpectancy = document.getElementById("lifeExpectancyInput").value
-        retireSaving = document.getElementById("retireSavingInput").value
-        dividendRate = document.getElementById("dividendRateInput").value
+        retireAge = enStringToFloat(document.getElementById("retireAgeInput").value)
+        lifeExpectancy = enStringToFloat(document.getElementById("lifeExpectancyInput").value)
+        retireSaving = enStringToFloat(document.getElementById("retireSavingInput").value)
+        dividendRatePercent = enStringToFloat(
+          document.getElementById("dividendRatePercentInput").value,
+        )
 
         // if (lifeExpectancy - retireAge <= 0) {
         //   document
@@ -22,8 +24,12 @@
         //     )
         // }
 
-        retireSaving = enStringToFloat(retireSaving)
-        result = computeMonthlyWithdrawal(retireAge, lifeExpectancy, retireSaving, dividendRate)
+        result = computeMonthlyWithdrawal(
+          retireAge,
+          lifeExpectancy,
+          retireSaving,
+          dividendRatePercent,
+        )
         document.getElementById("resultsStatus").textContent = ""
         document.getElementById("monthlyWithdrawResult").textContent = floatToEnString(result)
         result = computeMonthlyWithdrawalSimple(retireAge, lifeExpectancy, retireSaving)
@@ -32,7 +38,8 @@
           lifeExpectancy - retireAge,
         )
         document.getElementById("retireSaving").textContent = intToEnString(retireSaving)
-        document.getElementById("dividendRate").textContent = floatToEnString(dividendRate)
+        document.getElementById("dividendRatePercent").textContent =
+          floatToEnString(dividendRatePercent)
       }
 
       document.addEventListener("DOMContentLoaded", () => {
@@ -42,7 +49,10 @@
         formatInputOnBlur(document.getElementById("retireAgeInput"), formatStringAsEnInt)
         formatInputOnBlur(document.getElementById("lifeExpectancyInput"), formatStringAsEnInt)
         formatInputOnBlur(document.getElementById("retireSavingInput"), formatStringAsEnInt)
-        formatInputOnBlur(document.getElementById("dividendRateInput"), formatStringAsEnFloat)
+        formatInputOnBlur(
+          document.getElementById("dividendRatePercentInput"),
+          formatStringAsEnFloat,
+        )
       })
     </script>
   </head>
@@ -51,7 +61,9 @@
       <div id="navbar-menu" class="navbar-menu">
         <div class="navbar-start">
           <a class="navbar-item" href="../index.html"> Home </a>
-          <a class="navbar-item"> Take-Home Salary & Tax Calculator </a>
+          <a class="navbar-item" href="take-home-salary-tax.html">
+            Take-Home Salary & Tax Calculator
+          </a>
         </div>
       </div>
     </nav>
@@ -115,7 +127,6 @@
                         id="retireSavingInput"
                         class="input is-primary"
                         type="text"
-                        data-type="currency"
                         placeholder="1,000,000"
                         value="1,000,000"
                         required
@@ -131,7 +142,7 @@
                     <label class="label">EPF Annual Dividend Rate / ROI (%)</label>
                     <div class="control has-icons-left has-icons-right">
                       <input
-                        id="dividendRateInput"
+                        id="dividendRatePercentInput"
                         class="input is-primary"
                         type="text"
                         placeholder="5.00"
@@ -189,7 +200,7 @@
                       Calculation done by assuming <span id="yearsInRetirement">🤔</span> years in
                       retirement, with EPF savings of RM <span id="retireSaving">🤔</span> at
                       retirement and an annual dividend rate of
-                      <span id="dividendRate">🤔</span> percent.
+                      <span id="dividendRatePercent">🤔</span> %.
                     </p>
                   </div>
                 </div>

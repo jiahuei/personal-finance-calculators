@@ -34,6 +34,10 @@
         document.getElementById("taxReliefOthers").textContent = floatToEnString(taxReliefOthers)
       }
 
+      function formatEpfRatePercent(str) {
+        return formatStringAsEnFloat(str, 9, 11)
+      }
+
       function formatTaxReliefPrs(str) {
         return formatStringAsEnFloat(str, 0, 3000)
       }
@@ -44,7 +48,7 @@
         addFooter()
         formatInputOnBlur(document.getElementById("baseSalaryInput"), formatStringAsEnFloat)
         formatInputOnBlur(document.getElementById("bonusAmountInput"), formatStringAsEnFloat)
-        formatInputOnBlur(document.getElementById("epfRatePercentInput"), formatStringAsEnFloat)
+        formatInputOnBlur(document.getElementById("epfRatePercentInput"), formatEpfRatePercent)
         formatInputOnBlur(document.getElementById("taxReliefPrsInput"), formatTaxReliefPrs)
         formatInputOnBlur(document.getElementById("taxReliefOthersInput"), formatStringAsEnFloat)
       })

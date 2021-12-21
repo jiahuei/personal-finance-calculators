@@ -2,6 +2,14 @@
 /* https://fontawesome.com/v5.15/how-to-use/on-the-web/using-with/jquery */
 @import "https://use.fontawesome.com/releases/v5.15.4/css/all.css";
 
+/* https://codepen.io/timacdonald/pen/EQmQbL */
+.button.is-multiline {
+  min-height: inherit;
+  white-space: unset;
+  height: auto;
+  flex-direction: column;
+}
+
 .disclaimer {
   font-size: small;
 }

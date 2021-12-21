@@ -14,17 +14,21 @@
         taxReliefPrs = enStringToFloat(document.getElementById("taxReliefPrsInput").value)
         taxReliefOthers = enStringToFloat(document.getElementById("taxReliefOthersInput").value)
 
-        annualIncome = computeAnnualIncome(baseSalary, bonusAmount) - taxReliefPrs
+        annualIncome = computeAnnualIncome(baseSalary, bonusAmount)
         epfAnnualContribution = computeEpfAnnualContribution(baseSalary, epfRatePercent)
 
         epfRelief = epfReliefYA2020(epfAnnualContribution)
         annualTax = computeTaxYA2020(
           annualIncome - 9000 - epfRelief - taxReliefPrs - taxReliefOthers,
         )
-        monthlyTakeHome = (annualIncome - epfAnnualContribution - annualTax) / 12
+        monthlyTakeHome = (annualIncome - epfAnnualContribution - annualTax - taxReliefPrs) / 12
 
         document.getElementById("resultsStatus").textContent = ""
         document.getElementById("monthlyTakeHome").textContent = floatToEnString(monthlyTakeHome)
+        document.getElementById("annualTakeHome").textContent = floatToEnString(
+          monthlyTakeHome * 12,
+        )
+        document.getElementById("monthlyTax").textContent = floatToEnString(annualTax / 12)
         document.getElementById("annualTax").textContent = floatToEnString(annualTax)
         document.getElementById("baseSalary").textContent = floatToEnString(baseSalary)
         document.getElementById("bonusAmount").textContent = floatToEnString(bonusAmount)
@@ -197,11 +201,13 @@
             <div class="content">
               <p class="subtitle is-5">
                 Your take-home salary is RM
-                <span id="monthlyTakeHome">🤔❓</span> each month.
+                <span id="monthlyTakeHome">🤔❓</span> per month, or RM
+                <span id="annualTakeHome">🤔❓</span> per year.
               </p>
               <p class="subtitle is-5">
-                Your annual tax is RM
-                <span id="annualTax">🤔❓</span>.
+                Your tax is RM
+                <span id="monthlyTax">🤔❓</span> per month, or RM
+                <span id="annualTax">🤔❓</span> per year.
               </p>
               <div class="notification is-info is-light">
                 <div class="columns">

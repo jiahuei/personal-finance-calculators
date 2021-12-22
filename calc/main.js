@@ -228,7 +228,8 @@ function addFooter() {
   <p>
     Made by <a href="https://github.com/jiahuei">Jia-Huei Tan</a>. The source code and website content are
     licensed <a href="https://choosealicense.com/licenses/gpl-3.0/">GPL-3.0</a>. 
-    <a href="photo-credits.html">Click here for photo credits</a>.
+    <a href="photo-credits.html">Click here for photo credits</a>. 
+    <a href="https://icons8.com/icon/85951/calculator">Calculator favicon by Icons8</a>.
   </p>
   <p>
     Complete source code of licensed works and modifications, which include larger works using a licensed work, 

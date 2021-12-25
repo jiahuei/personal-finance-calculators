@@ -20,10 +20,18 @@
         annualIncome = computeAnnualIncome(baseSalary, bonusAmount)
         epfAnnualContribution = computeEpfAnnualContribution(baseSalary, epfRatePercent)
 
+        personalRelief = 9000
         epfRelief = epfReliefYA2020(epfAnnualContribution)
-        annualTax = computeTaxYA2020(
-          annualIncome - 9000 - epfRelief - taxReliefPrs - taxReliefOthers,
-        )
+
+        let ignoreTaxRelief = document.getElementById("ignoreTaxReliefInput")
+        if (ignoreTaxRelief.checked == true) {
+          personalRelief = epfRelief = taxReliefOthers = taxReliefPrs = 0
+          annualTax = computeTaxYA2020(annualIncome)
+        } else {
+          annualTax = computeTaxYA2020(
+            annualIncome - personalRelief - epfRelief - taxReliefPrs - taxReliefOthers,
+          )
+        }
         monthlyTakeHome = (annualIncome - epfAnnualContribution - annualTax - taxReliefPrs) / 12
 
         document.getElementById("resultsStatus").textContent = ""
@@ -36,13 +44,19 @@
         document.getElementById("baseSalary").textContent = floatToEnString(baseSalary)
         document.getElementById("bonusAmount").textContent = floatToEnString(bonusAmount)
         document.getElementById("epfRatePercent").textContent = floatToEnString(epfRatePercent)
+        document.getElementById("personalRelief").textContent = floatToEnString(personalRelief)
         document.getElementById("epfRelief").textContent = floatToEnString(epfRelief)
         document.getElementById("taxReliefPrs").textContent = floatToEnString(taxReliefPrs)
         document.getElementById("taxReliefOthers").textContent = floatToEnString(taxReliefOthers)
       }
 
+      function toggleTaxReliefInputs() {
+        toggleDisabled(document.getElementById("taxReliefPrsInput"))
+        toggleDisabled(document.getElementById("taxReliefOthersInput"))
+      }
+
       function formatEpfRatePercent(str) {
-        return formatStringAsEnFloat(str, 9, 11)
+        return formatStringAsEnFloat(str, 0, 11)
       }
 
       function formatTaxReliefPrs(str) {
@@ -138,7 +152,7 @@
                         <i class="fas fa-wallet"></i>
                       </span>
                     </div>
-                    <p class="help">Either 11% or 9%.</p>
+                    <p class="help">Either 11% or 9% for employees with EPF, 0% for pensioners.</p>
                   </div>
                 </div>
               </div>
@@ -182,6 +196,14 @@
                   </div>
                 </div>
               </div>
+              <label class="checkbox">
+                <input
+                  type="checkbox"
+                  id="ignoreTaxReliefInput"
+                  onclick="toggleTaxReliefInputs()"
+                />
+                Ignore tax deductions and relief in the calculation
+              </label>
 
               <div class="columns mt-0">
                 <div class="column">
@@ -227,10 +249,11 @@
                       Calculation done by assuming salary of RM
                       <span id="baseSalary">🤔</span>, bonus of
                       <span id="bonusAmount">🤔</span> month(s), EPF employee contribution rate of
-                      <span id="epfRatePercent">🤔</span> %, personal tax relief of RM 9,000.00, EPF
-                      relief of RM <span id="epfRelief">🤔</span> (maximum RM 4,000.00), PRS /
-                      annuity tax relief of RM <span id="taxReliefPrs">🤔</span> and other tax
-                      relief totalling RM <span id="taxReliefOthers">🤔</span>.
+                      <span id="epfRatePercent">🤔</span> %, personal tax relief of RM
+                      <span id="personalRelief">🤔</span>, EPF relief of RM
+                      <span id="epfRelief">🤔</span> (maximum RM 4,000.00), PRS / annuity tax relief
+                      of RM <span id="taxReliefPrs">🤔</span> and other tax relief totalling RM
+                      <span id="taxReliefOthers">🤔</span>.
                     </p>
                   </div>
                 </div>

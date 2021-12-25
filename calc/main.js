@@ -157,6 +157,10 @@ function computeTaxYA2020(chargeableIncome) {
   return payableTax
 }
 
+function toggleDisabled(element) {
+  element.disabled = !element.disabled
+}
+
 function toggleNavBarBurger() {
   let burgerIcon = document.getElementById("navbar-burger")
   let dropMenu = document.getElementById("navbar-menu")

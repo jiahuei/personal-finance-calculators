@@ -11,10 +11,10 @@
     <script type="text/javascript" src="calc/main.js"></script>
     <script type="text/javascript">
       function submitForm() {
-        retireAge = enStringToFloat(document.getElementById("retireAgeInput").value)
-        lifeExpectancy = enStringToFloat(document.getElementById("lifeExpectancyInput").value)
-        retireSaving = enStringToFloat(document.getElementById("retireSavingInput").value)
-        dividendRatePercent = enStringToFloat(
+        let retireAge = enStringToFloat(document.getElementById("retireAgeInput").value)
+        let lifeExpectancy = enStringToFloat(document.getElementById("lifeExpectancyInput").value)
+        let retireSaving = enStringToFloat(document.getElementById("retireSavingInput").value)
+        let dividendRatePercent = enStringToFloat(
           document.getElementById("dividendRatePercentInput").value,
         )
 
@@ -27,7 +27,7 @@
         //     )
         // }
 
-        result = computeMonthlyWithdrawal(
+        let result = computeMonthlyWithdrawal(
           retireAge,
           lifeExpectancy,
           retireSaving,

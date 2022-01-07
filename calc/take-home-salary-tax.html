@@ -11,19 +11,20 @@
     <script type="text/javascript" src="calc/main.js"></script>
     <script type="text/javascript">
       function submitForm() {
-        baseSalary = enStringToFloat(document.getElementById("baseSalaryInput").value)
-        bonusAmount = enStringToFloat(document.getElementById("bonusAmountInput").value)
-        epfRatePercent = enStringToFloat(document.getElementById("epfRatePercentInput").value)
-        taxReliefPrs = enStringToFloat(document.getElementById("taxReliefPrsInput").value)
-        taxReliefOthers = enStringToFloat(document.getElementById("taxReliefOthersInput").value)
+        let baseSalary = enStringToFloat(document.getElementById("baseSalaryInput").value)
+        let bonusAmount = enStringToFloat(document.getElementById("bonusAmountInput").value)
+        let epfRatePercent = enStringToFloat(document.getElementById("epfRatePercentInput").value)
+        let taxReliefPrs = enStringToFloat(document.getElementById("taxReliefPrsInput").value)
+        let taxReliefOthers = enStringToFloat(document.getElementById("taxReliefOthersInput").value)
 
-        annualIncome = computeAnnualIncome(baseSalary, bonusAmount)
-        epfAnnualContribution = computeEpfAnnualContribution(baseSalary, epfRatePercent)
+        let annualIncome = computeAnnualIncome(baseSalary, bonusAmount)
+        let epfAnnualContribution = computeEpfAnnualContribution(baseSalary, epfRatePercent)
 
-        personalRelief = 9000
-        epfRelief = epfReliefYA2020(epfAnnualContribution)
+        let personalRelief = 9000
+        let epfRelief = epfReliefYA2020(epfAnnualContribution)
 
         let ignoreTaxRelief = document.getElementById("ignoreTaxReliefInput")
+        let annualTax = 0
         if (ignoreTaxRelief.checked == true) {
           personalRelief = epfRelief = taxReliefOthers = taxReliefPrs = 0
           annualTax = computeTaxYA2020(annualIncome)
@@ -32,7 +33,7 @@
             annualIncome - personalRelief - epfRelief - taxReliefPrs - taxReliefOthers,
           )
         }
-        monthlyTakeHome = (annualIncome - epfAnnualContribution - annualTax - taxReliefPrs) / 12
+        let monthlyTakeHome = (annualIncome - epfAnnualContribution - annualTax - taxReliefPrs) / 12
 
         document.getElementById("resultsStatus").textContent = ""
         document.getElementById("monthlyTakeHome").textContent = floatToEnString(monthlyTakeHome)

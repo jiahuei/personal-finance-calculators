@@ -2,17 +2,16 @@
 __ref__/
 
 # Original full-size images
-img/ori/
+/img/ori/
 
 # Sphinx docs
-docs/_build
+/docs/_build
 
 # PyCharm
-.idea/
+/.idea/
 
 # VS Code
-*.vscode
-.devcontainer/
+/.devcontainer/
 
 # OS
 thumbs.db

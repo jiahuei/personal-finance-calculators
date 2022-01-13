@@ -124,8 +124,41 @@ function computeEpfAnnualContribution(baseSalary, epfRatePercent) {
   return baseSalary * 12 * (epfRatePercent / 100)
 }
 
+function epfReliefYA2021(epfAnnualContribution) {
+  return epfReliefYA2020(epfAnnualContribution)
+}
+
 function epfReliefYA2020(epfAnnualContribution) {
   return Math.min(epfAnnualContribution, 4000)
+}
+
+function computeTaxYA2021(chargeableIncome) {
+  // [bracket ceiling, bracket tax rate, accumulated tax from lower brackets]
+  let rates = [
+    [0, 0.0, 0],
+    [5000, 0.0, 0],
+    [20000, 1.0, 0],
+    [35000, 3.0, 150],
+    [50000, 8.0, 600],
+    [70000, 13.0, 1800],
+    [100000, 21.0, 4400],
+    [250000, 24.0, 10700],
+    [400000, 24.5, 46700],
+    [600000, 25.0, 83450],
+    [1000000, 26.0, 133450],
+    [2000000, 28.0, 237450],
+    [Infinity, 30.0, 517450],
+  ]
+  // Loop through the array
+  let payableTax = 0
+  for (var i = 1; i < rates.length; i++) {
+    let floor = rates[i - 1][0]
+    let [ceiling, rate, tax] = rates[i]
+    if (chargeableIncome > floor && chargeableIncome <= ceiling) {
+      payableTax = tax + (chargeableIncome - floor) * (rate / 100)
+    }
+  }
+  return payableTax
 }
 
 function computeTaxYA2020(chargeableIncome) {

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Take-Home Salary & Tax Calculator (YA 2021)</title>
+    <!-- https://stackoverflow.com/a/42997313 -->
+    <base href="../" />
+    <link rel="shortcut icon" type="image/png" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+    <script type="text/javascript" src="calc/main.js"></script>
+    <script type="text/javascript">
+      function submitForm() {
+        let baseSalary = enStringToFloat(document.getElementById("baseSalaryInput").value)
+        let bonusAmount = enStringToFloat(document.getElementById("bonusAmountInput").value)
+        let epfRatePercent = enStringToFloat(document.getElementById("epfRatePercentInput").value)
+        let taxReliefPrs = enStringToFloat(document.getElementById("taxReliefPrsInput").value)
+        let taxReliefOthers = enStringToFloat(document.getElementById("taxReliefOthersInput").value)
+
+        let annualIncome = computeAnnualIncome(baseSalary, bonusAmount)
+        let epfAnnualContribution = computeEpfAnnualContribution(baseSalary, epfRatePercent)
+
+        let personalRelief = 9000
+        let epfRelief = epfReliefYA2021(epfAnnualContribution)
+
+        let ignoreTaxRelief = document.getElementById("ignoreTaxReliefInput")
+        let annualTax = 0
+        if (ignoreTaxRelief.checked == true) {
+          personalRelief = epfRelief = taxReliefOthers = taxReliefPrs = 0
+          annualTax = computeTaxYA2021(annualIncome)
+        } else {
+          annualTax = computeTaxYA2021(
+            annualIncome - personalRelief - epfRelief - taxReliefPrs - taxReliefOthers,
+          )
+        }
+        let monthlyTakeHome = (annualIncome - epfAnnualContribution - annualTax - taxReliefPrs) / 12
+
+        document.getElementById("resultsStatus").textContent = ""
+        document.getElementById("monthlyTakeHome").textContent = floatToEnString(monthlyTakeHome)
+        document.getElementById("annualTakeHome").textContent = floatToEnString(
+          monthlyTakeHome * 12,
+        )
+        document.getElementById("monthlyTax").textContent = floatToEnString(annualTax / 12)
+        document.getElementById("annualTax").textContent = floatToEnString(annualTax)
+        document.getElementById("baseSalary").textContent = floatToEnString(baseSalary)
+        document.getElementById("bonusAmount").textContent = floatToEnString(bonusAmount)
+        document.getElementById("epfRatePercent").textContent = floatToEnString(epfRatePercent)
+        document.getElementById("personalRelief").textContent = floatToEnString(personalRelief)
+        document.getElementById("epfRelief").textContent = floatToEnString(epfRelief)
+        document.getElementById("taxReliefPrs").textContent = floatToEnString(taxReliefPrs)
+        document.getElementById("taxReliefOthers").textContent = floatToEnString(taxReliefOthers)
+      }
+
+      function toggleTaxReliefInputs() {
+        toggleDisabled(document.getElementById("taxReliefPrsInput"))
+        toggleDisabled(document.getElementById("taxReliefOthersInput"))
+      }
+
+      function formatEpfRatePercent(str) {
+        return formatStringAsEnFloat(str, 0, 11)
+      }
+
+      function formatTaxReliefPrs(str) {
+        return formatStringAsEnFloat(str, 0, 3000)
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        addNavBarBrand()
+        addNavBarEnd()
+        addFooter()
+        formatInputOnBlur(document.getElementById("baseSalaryInput"), formatStringAsEnFloat)
+        formatInputOnBlur(document.getElementById("bonusAmountInput"), formatStringAsEnFloat)
+        formatInputOnBlur(document.getElementById("epfRatePercentInput"), formatEpfRatePercent)
+        formatInputOnBlur(document.getElementById("taxReliefPrsInput"), formatTaxReliefPrs)
+        formatInputOnBlur(document.getElementById("taxReliefOthersInput"), formatStringAsEnFloat)
+      })
+    </script>
+  </head>
+  <body class="take-home-salary-bg">
+    <nav class="navbar" id="navbar" role="navigation" aria-label="main navigation">
+      <div id="navbar-menu" class="navbar-menu">
+        <div class="navbar-start">
+          <a class="navbar-item" href="index.html"> Home </a>
+          <a class="navbar-item" href="calc/retirement-monthly-income.html">
+            Retirement Income Calculator
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <section class="section">
+      <div class="container">
+        <h1 class="title is-2">Take-Home Salary & Tax Calculator (YA 2021)</h1>
+      </div>
+    </section>
+    <section class="section pt-3 pb-3">
+      <div class="container">
+        <div class="card white-85h">
+          <div class="card-content">
+            <p class="title is-4">Fill in these information</p>
+            <form action="javascript:submitForm()">
+              <div class="columns mb-0">
+                <div class="column">
+                  <div class="field">
+                    <label class="label">Base Salary (monthly)</label>
+                    <div class="control has-icons-left has-icons-right">
+                      <input
+                        id="baseSalaryInput"
+                        class="input is-primary"
+                        type="text"
+                        placeholder="7,500.00"
+                        value="7,500.00"
+                        required
+                      />
+                      <span class="icon is-small is-left">
+                        <i class="fas fa-dollar-sign"></i>
+                      </span>
+                    </div>
+                    <p class="help">Monthly salary including allowances.</p>
+                  </div>
+                </div>
+                <div class="column">
+                  <div class="field">
+                    <label class="label">Bonus (number of months)</label>
+                    <div class="control has-icons-left has-icons-right">
+                      <input
+                        id="bonusAmountInput"
+                        class="input is-primary"
+                        type="text"
+                        placeholder="1.50"
+                        value="1.50"
+                        required
+                      />
+                      <span class="icon is-small is-left">
+                        <i class="fas fa-dollar-sign"></i>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="column">
+                  <div class="field">
+                    <label class="label">EPF Contribution Rate (%)</label>
+                    <div class="control has-icons-left has-icons-right">
+                      <input
+                        id="epfRatePercentInput"
+                        class="input is-primary"
+                        type="text"
+                        placeholder="11.00"
+                        value="11.00"
+                        required
+                      />
+                      <span class="icon is-small is-left">
+                        <i class="fas fa-wallet"></i>
+                      </span>
+                    </div>
+                    <p class="help">Either 11% or 9% for employees with EPF, 0% for pensioners.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="columns mb-0">
+                <div class="column">
+                  <div class="field">
+                    <label class="label">Tax Relief (PRS / annuity)</label>
+                    <div class="control has-icons-left has-icons-right">
+                      <input
+                        id="taxReliefPrsInput"
+                        class="input is-primary"
+                        type="text"
+                        placeholder="3,000.00"
+                        value="3,000.00"
+                        required
+                      />
+                      <span class="icon is-small is-left">
+                        <i class="fas fa-funnel-dollar"></i>
+                      </span>
+                    </div>
+                    <p class="help">Up to RM 3,000.00</p>
+                  </div>
+                </div>
+                <div class="column">
+                  <div class="field">
+                    <label class="label">Tax Relief (all others, excluding EPF relief)</label>
+                    <div class="control has-icons-left has-icons-right">
+                      <input
+                        id="taxReliefOthersInput"
+                        class="input is-primary"
+                        type="text"
+                        placeholder="6,000.00"
+                        value="6,000.00"
+                        required
+                      />
+                      <span class="icon is-small is-left">
+                        <i class="fas fa-funnel-dollar"></i>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <label class="checkbox">
+                <input
+                  type="checkbox"
+                  id="ignoreTaxReliefInput"
+                  onclick="toggleTaxReliefInputs()"
+                />
+                Ignore tax deductions and relief in the calculation
+              </label>
+
+              <div class="columns mt-0">
+                <div class="column">
+                  <div class="field">
+                    <div class="control">
+                      <button class="button is-link" type="submit">
+                        Click here to calculate !
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section pt-3 pb-3">
+      <div class="container">
+        <div class="card white-85h">
+          <div class="card-content">
+            <p class="title is-4">Results <span id="resultsStatus"> (pending) </span></p>
+            <div class="content">
+              <p class="subtitle is-5">
+                Your take-home salary is RM
+                <span id="annualTakeHome">🤔❓</span> per year, or RM
+                <span id="monthlyTakeHome">🤔❓</span> per month.
+              </p>
+              <p class="subtitle is-5">
+                Your tax is RM
+                <span id="annualTax">🤔❓</span> per year, or RM
+                <span id="monthlyTax">🤔❓</span> per month.
+              </p>
+              <div class="notification is-info is-light">
+                <div class="columns">
+                  <div class="column is-narrow">
+                    <span class="icon">
+                      <i class="fas fa-info"></i>
+                    </span>
+                  </div>
+                  <div class="column">
+                    <p>
+                      Calculation done by assuming salary of RM
+                      <span id="baseSalary">🤔</span>, bonus of
+                      <span id="bonusAmount">🤔</span> month(s), EPF employee contribution rate of
+                      <span id="epfRatePercent">🤔</span> %, personal tax relief of RM
+                      <span id="personalRelief">🤔</span>, EPF relief of RM
+                      <span id="epfRelief">🤔</span> (maximum RM 4,000.00), PRS / annuity tax relief
+                      of RM <span id="taxReliefPrs">🤔</span> and other tax relief totalling RM
+                      <span id="taxReliefOthers">🤔</span>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <!-- <div class="notification is-warning is-light">
+                <div class="columns">
+                  <div class="column is-narrow">
+                    <span class="icon">
+                      <i class="fas fa-exclamation"></i>
+                    </span>
+                  </div>
+
+                  <div class="column">
+                    <p>
+                      This tool does not take into account the inflation rate which affects your
+                      purchasing power.
+                    </p>
+                    <p>
+                      For example, at an inflation rate of 3%, your income of RM 1,000 will only be
+                      worth RM 971 after one year, and RM 943 the year after.
+                    </p>
+                  </div>
+                </div>
+              </div> -->
+            </div>
+          </div>
+          <footer class="card-footer">
+            <div class="content">
+              <p class="card-footer-item disclaimer">
+                This calculator is intended to provide estimates only and is not intended for
+                professional advice. The applicability and accuracy of the calculator is not
+                guaranteed and may vary based on your individual circumstances. All examples are
+                hypothetical and are for illustrative purposes.
+              </p>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </section>
+    <footer class="footer" id="footer"></footer>
+  </body>
+</html>

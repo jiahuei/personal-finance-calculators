@@ -3,17 +3,10 @@
     "*.ipynb": "jupyter.notebook.ipynb"
   },
   "files.eol": "\n",
-  "[python]": {
-    "editor.wordBasedSuggestions": false
-  },
-  "python.defaultInterpreterPath": "C:\\Users\\jiahuei\\anaconda3\\envs\\py38-eel\\python.exe",
-  "python.languageServer": "Pylance",
   "python.formatting.provider": "black",
-  "python.formatting.blackArgs": ["--line-length=120", "--safe"],
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": false,
   "python.linting.flake8Enabled": true,
-  "python.linting.flake8Args": ["--max-line-length=120", "--ignore=E203,E501,W503"],
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -42,6 +35,5 @@
     "editor.tabSize": 2,
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "restructuredtext.confPath": "${workspaceFolder}\\docs",
-  "workbench.colorTheme": "One Dark Pro"
+  "restructuredtext.confPath": "${workspaceFolder}/docs"
 }

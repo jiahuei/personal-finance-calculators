@@ -1,0 +1,20 @@
+{
+	"HEADER": {
+		"prefix": "header",
+		"body": [
+			"\"\"\"",
+			"@Author  :   JiaHuei",
+			"@Time    :   $CURRENT_YEAR/$CURRENT_MONTH/$CURRENT_DATE $CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND",
+			"\"\"\"",
+			"$0"
+		],
+	},
+	"MAIN": {
+		"prefix": "main",
+		"body": [
+			"if __name__ == \"__main__\":",
+			"    ",
+			"$0"
+		],
+	}
+}

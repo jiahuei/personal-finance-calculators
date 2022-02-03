@@ -19,6 +19,8 @@
 
         let annualIncome = computeAnnualIncome(baseSalary, bonusAmount)
         let epfAnnualContribution = computeEpfAnnualContribution(baseSalary, epfRatePercent)
+        let socso = computeSocso(baseSalary)
+        let eis = computeEis(baseSalary)
 
         let personalRelief = 9000
         let epfRelief = epfReliefYA2021(epfAnnualContribution)
@@ -33,7 +35,8 @@
             annualIncome - personalRelief - epfRelief - taxReliefPrs - taxReliefOthers,
           )
         }
-        let monthlyTakeHome = (annualIncome - epfAnnualContribution - annualTax - taxReliefPrs) / 12
+        let monthlyTakeHome =
+          (annualIncome - epfAnnualContribution - annualTax - taxReliefPrs) / 12 - socso - eis
 
         document.getElementById("resultsStatus").textContent = ""
         document.getElementById("monthlyTakeHome").textContent = floatToEnString(monthlyTakeHome)
@@ -42,9 +45,16 @@
         )
         document.getElementById("monthlyTax").textContent = floatToEnString(annualTax / 12)
         document.getElementById("annualTax").textContent = floatToEnString(annualTax)
+        // Breakdown
         document.getElementById("baseSalary").textContent = floatToEnString(baseSalary)
         document.getElementById("bonusAmount").textContent = floatToEnString(bonusAmount)
+        document.getElementById("annualIncome").textContent = floatToEnString(annualIncome)
         document.getElementById("epfRatePercent").textContent = floatToEnString(epfRatePercent)
+        document.getElementById("epfMonthlyContribution").textContent = floatToEnString(
+          epfAnnualContribution / 12,
+        )
+        document.getElementById("socso").textContent = floatToEnString(socso)
+        document.getElementById("eis").textContent = floatToEnString(eis)
         document.getElementById("personalRelief").textContent = floatToEnString(personalRelief)
         document.getElementById("epfRelief").textContent = floatToEnString(epfRelief)
         document.getElementById("taxReliefPrs").textContent = floatToEnString(taxReliefPrs)
@@ -229,14 +239,13 @@
             <p class="title is-4">Results <span id="resultsStatus"> (pending) </span></p>
             <div class="content">
               <p class="subtitle is-5">
-                Your take-home salary is RM
-                <span id="annualTakeHome">🤔❓</span> per year, or RM
-                <span id="monthlyTakeHome">🤔❓</span> per month.
+                Your take-home salary is RM <span id="annualTakeHome">🤔❓</span> per year, or
+                <strong>RM <span id="monthlyTakeHome">🤔❓</span> per month</strong>.
               </p>
               <p class="subtitle is-5">
                 Your tax is RM
-                <span id="annualTax">🤔❓</span> per year, or RM
-                <span id="monthlyTax">🤔❓</span> per month.
+                <span id="annualTax">🤔❓</span> per year, or
+                <strong>RM <span id="monthlyTax">🤔❓</span> per month</strong>.
               </p>
               <div class="notification is-info is-light">
                 <div class="columns">
@@ -246,7 +255,7 @@
                     </span>
                   </div>
                   <div class="column">
-                    <p>
+                    <!-- <p>
                       Calculation done by assuming salary of RM
                       <span id="baseSalary">🤔</span>, bonus of
                       <span id="bonusAmount">🤔</span> month(s), EPF employee contribution rate of
@@ -255,7 +264,99 @@
                       <span id="epfRelief">🤔</span> (maximum RM 4,000.00), PRS / annuity tax relief
                       of RM <span id="taxReliefPrs">🤔</span> and other tax relief totalling RM
                       <span id="taxReliefOthers">🤔</span>.
+                    </p> -->
+                    <p>
+                      <strong>Breakdown</strong>
                     </p>
+                    <table class="table is-hoverable">
+                      <thead>
+                        <tr>
+                          <th>Item</th>
+                          <th class="has-text-right">Value (RM)</th>
+                          <th>&#8199;</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <th>Annual Income</th>
+                          <th></th>
+                          <th></th>
+                        </tr>
+                        <tr>
+                          <td>
+                            Salary of RM <span id="baseSalary">🤔</span> + Bonus of
+                            <span id="bonusAmount">🤔</span> month(s)
+                          </td>
+                          <td class="has-text-right"><span id="annualIncome">🤔</span></td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <th>Employee Contributions (Monthly)</th>
+                          <th></th>
+                          <th></th>
+                        </tr>
+                        <tr>
+                          <td>
+                            EPF of <span id="epfRatePercent">🤔</span> % (estimation only,
+                            <a
+                              href="https://www.kwsp.gov.my/documents/20126/927226/BI-Jadual+Ketiga+.pdf"
+                              >see this for precise amount</a
+                            >)
+                          </td>
+                          <td class="has-text-right">
+                            <span id="epfMonthlyContribution">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>SOCSO</td>
+                          <td class="has-text-right">
+                            <span id="socso">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>EIS</td>
+                          <td class="has-text-right">
+                            <span id="eis">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <th>Tax Reliefs</th>
+                          <th></th>
+                          <th></th>
+                        </tr>
+                        <tr>
+                          <td>Personal</td>
+                          <td class="has-text-right">
+                            <span id="personalRelief">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>EPF (maximum RM 4,000.00)</td>
+                          <td class="has-text-right">
+                            <span id="epfRelief">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>PRS / annuity (maximum RM 3,000.00)</td>
+                          <td class="has-text-right">
+                            <span id="taxReliefPrs">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>Others</td>
+                          <td class="has-text-right">
+                            <span id="taxReliefOthers">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>

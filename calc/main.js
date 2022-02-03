@@ -55,6 +55,15 @@ function formatStringAsEnInt(str, minimum = 0, maximum = Infinity) {
   }
 }
 
+function padStringToFixedLength(str, length, padLeft = true) {
+  if (padLeft) {
+    str = str.padStart(length, "\u2007")
+  } else {
+    str = str.padEnd(length, "\u2007")
+  }
+  return str
+}
+
 function formatInput(el, formatFunc = formatStringAsEnFloat) {
   // https://codepen.io/559wade/pen/LRzEjj
 
@@ -188,6 +197,127 @@ function computeTaxYA2020(chargeableIncome) {
     }
   }
   return payableTax
+}
+
+function computeSocso(basicSalary) {
+  // [bracket ceiling, bracket amount]
+  let rates = [
+    [30, 0.1],
+    [50, 0.2],
+    [70, 0.3],
+    [100, 0.4],
+    [140, 0.6],
+    [200, 0.85],
+    [300, 1.25],
+    [400, 1.75],
+    [500, 2.25],
+    [600, 2.75],
+    [700, 3.25],
+    [800, 3.75],
+    [900, 4.25],
+    [1000, 4.75],
+    [1100, 5.25],
+    [1200, 5.75],
+    [1300, 6.25],
+    [1400, 6.75],
+    [1500, 7.25],
+    [1600, 7.75],
+    [1700, 8.25],
+    [1800, 8.75],
+    [1900, 9.25],
+    [2000, 9.75],
+    [2100, 10.25],
+    [2200, 10.75],
+    [2300, 11.25],
+    [2400, 11.75],
+    [2500, 12.25],
+    [2600, 12.75],
+    [2700, 13.25],
+    [2800, 13.75],
+    [2900, 14.25],
+    [3000, 14.75],
+    [3100, 15.25],
+    [3200, 15.75],
+    [3300, 16.25],
+    [3400, 16.75],
+    [3500, 17.25],
+    [3600, 17.75],
+    [3700, 18.25],
+    [3800, 18.75],
+    [3900, 19.25],
+    [4000, 19.75],
+    [Infinity, 19.75],
+  ]
+  // Loop through the array
+  let payable = 0
+  for (var i = 1; i < rates.length; i++) {
+    let floor = rates[i - 1][0]
+    let [ceiling, amount] = rates[i]
+    if (basicSalary > floor && basicSalary <= ceiling) {
+      payable = amount
+    }
+  }
+  return payable
+}
+function computeEis(basicSalary) {
+  // [bracket ceiling, bracket amount]
+  let rates = [
+    [30, 0.05],
+    [50, 0.1],
+    [70, 0.15],
+    [100, 0.2],
+    [140, 0.25],
+    [200, 0.35],
+    [300, 0.5],
+    [400, 0.7],
+    [500, 0.9],
+    [600, 1.1],
+    [700, 1.3],
+    [800, 1.5],
+    [900, 1.7],
+    [1000, 1.9],
+    [1100, 2.1],
+    [1200, 2.3],
+    [1300, 2.5],
+    [1400, 2.7],
+    [1500, 2.9],
+    [1600, 3.1],
+    [1700, 3.3],
+    [1800, 3.5],
+    [1900, 3.7],
+    [2000, 3.9],
+    [2100, 4.1],
+    [2200, 4.3],
+    [2300, 4.5],
+    [2400, 4.7],
+    [2500, 4.9],
+    [2600, 5.1],
+    [2700, 5.3],
+    [2800, 5.5],
+    [2900, 5.7],
+    [3000, 5.9],
+    [3100, 6.1],
+    [3200, 6.3],
+    [3300, 6.5],
+    [3400, 6.7],
+    [3500, 6.9],
+    [3600, 7.1],
+    [3700, 7.3],
+    [3800, 7.5],
+    [3900, 7.7],
+    [4000, 7.9],
+    [Infinity, 7.9],
+  ]
+  // Loop through the array
+  let payable = 0
+  for (var i = 1; i < rates.length; i++) {
+    let floor = rates[i - 1][0]
+    let [ceiling, amount] = rates[i]
+    if (basicSalary > floor && basicSalary <= ceiling) {
+      payable = amount
+    }
+  }
+  return payable
 }
 
 function toggleDisabled(element) {

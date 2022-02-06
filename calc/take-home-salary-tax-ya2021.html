@@ -35,6 +35,7 @@
             annualIncome - personalRelief - epfRelief - taxReliefPrs - taxReliefOthers,
           )
         }
+        let effectiveTaxRate = (annualTax / annualIncome) * 100.0
         let monthlyTakeHome =
           (annualIncome - epfAnnualContribution - annualTax - taxReliefPrs) / 12 - socso - eis
 
@@ -45,6 +46,7 @@
         )
         document.getElementById("monthlyTax").textContent = floatToEnString(annualTax / 12)
         document.getElementById("annualTax").textContent = floatToEnString(annualTax)
+        document.getElementById("effectiveTaxRate").textContent = floatToEnString(effectiveTaxRate)
         // Breakdown
         document.getElementById("baseSalary").textContent = floatToEnString(baseSalary)
         document.getElementById("bonusAmount").textContent = floatToEnString(bonusAmount)
@@ -245,7 +247,8 @@
               <p class="subtitle is-5">
                 Your tax is RM
                 <span id="annualTax">🤔❓</span> per year, or
-                <strong>RM <span id="monthlyTax">🤔❓</span> per month</strong>.
+                <strong>RM <span id="monthlyTax">🤔❓</span> per month</strong>. Your effective tax
+                rate is <span id="effectiveTaxRate">🤔❓</span> %.
               </p>
               <div class="notification is-info is-light">
                 <div class="columns">

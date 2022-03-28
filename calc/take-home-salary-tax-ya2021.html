@@ -14,11 +14,15 @@
         let baseSalary = enStringToFloat(document.getElementById("baseSalaryInput").value)
         let bonusAmount = enStringToFloat(document.getElementById("bonusAmountInput").value)
         let epfRatePercent = enStringToFloat(document.getElementById("epfRatePercentInput").value)
+        let epfEmployerRatePc = enStringToFloat(
+          document.getElementById("epfEmployerRatePercentInput").value,
+        )
         let taxReliefPrs = enStringToFloat(document.getElementById("taxReliefPrsInput").value)
         let taxReliefOthers = enStringToFloat(document.getElementById("taxReliefOthersInput").value)
 
         let annualIncome = computeAnnualIncome(baseSalary, bonusAmount)
         let epfAnnualContrib = computeEpfAnnualContribution(baseSalary, epfRatePercent)
+        let epfEmployerAnnualContrib = computeEpfAnnualContribution(baseSalary, epfEmployerRatePc)
         let socso = computeSocso(baseSalary)
         let eis = computeEis(baseSalary)
 
@@ -63,6 +67,26 @@
         document.getElementById("epfRelief").textContent = floatToEnString(epfRelief)
         document.getElementById("taxReliefPrs").textContent = floatToEnString(taxReliefPrs)
         document.getElementById("taxReliefOthers").textContent = floatToEnString(taxReliefOthers)
+        // EPF Breakdown
+        document.getElementById("epfEmployeeRatePcBkdwn").textContent =
+          floatToEnString(epfRatePercent)
+        document.getElementById("epfEmployeeMonthlyBkdwn").textContent = floatToEnString(
+          epfAnnualContrib / 12,
+        )
+        document.getElementById("epfEmployeeAnnualBkdwn").textContent =
+          floatToEnString(epfAnnualContrib)
+        document.getElementById("epfEmployerRatePcBkdwn").textContent =
+          floatToEnString(epfEmployerRatePc)
+        document.getElementById("epfEmployerMonthlyBkdwn").textContent = floatToEnString(
+          epfEmployerAnnualContrib / 12,
+        )
+        let epfTotalAnnual = epfAnnualContrib + epfEmployerAnnualContrib
+        document.getElementById("epfEmployerAnnualBkdwn").textContent =
+          floatToEnString(epfEmployerAnnualContrib)
+        document.getElementById("epfTotalMonthlyBkdwn").textContent = floatToEnString(
+          epfTotalAnnual / 12,
+        )
+        document.getElementById("epfTotalAnnualBkdwn").textContent = floatToEnString(epfTotalAnnual)
       }
 
       function toggleTaxReliefInputs() {
@@ -71,7 +95,7 @@
       }
 
       function formatEpfRatePercent(str) {
-        return formatStringAsEnFloat(str, 0, 11)
+        return formatStringAsEnFloat(str, 0, 13)
       }
 
       function formatTaxReliefPrs(str) {
@@ -85,6 +109,10 @@
         formatInputOnBlur(document.getElementById("baseSalaryInput"), formatStringAsEnFloat)
         formatInputOnBlur(document.getElementById("bonusAmountInput"), formatStringAsEnFloat)
         formatInputOnBlur(document.getElementById("epfRatePercentInput"), formatEpfRatePercent)
+        formatInputOnBlur(
+          document.getElementById("epfEmployerRatePercentInput"),
+          formatEpfRatePercent,
+        )
         formatInputOnBlur(document.getElementById("taxReliefPrsInput"), formatTaxReliefPrs)
         formatInputOnBlur(document.getElementById("taxReliefOthersInput"), formatStringAsEnFloat)
       })
@@ -153,7 +181,7 @@
                 </div>
                 <div class="column">
                   <div class="field">
-                    <label class="label">EPF Contribution Rate (%)</label>
+                    <label class="label">EPF Employee Rate (%)</label>
                     <div class="control has-icons-left has-icons-right">
                       <input
                         id="epfRatePercentInput"
@@ -168,6 +196,32 @@
                       </span>
                     </div>
                     <p class="help">Either 11% or 9% for employees with EPF, 0% for pensioners.</p>
+                  </div>
+                </div>
+                <div class="column">
+                  <div class="field">
+                    <label class="label">EPF Employer Rate (%)</label>
+                    <div class="control has-icons-left has-icons-right">
+                      <input
+                        id="epfEmployerRatePercentInput"
+                        class="input is-primary"
+                        type="text"
+                        placeholder="12.00"
+                        value="12.00"
+                        required
+                      />
+                      <span class="icon is-small is-left">
+                        <i class="fas fa-wallet"></i>
+                      </span>
+                    </div>
+                    <p class="help">
+                      Typically either 12% or 13% for employees below 60 years old, 0% for
+                      pensioners.
+                      <a
+                        href="https://www.kwsp.gov.my/en/employer/contribution/all-about-your-responsibility"
+                        >See this for more info</a
+                      >
+                    </p>
                   </div>
                 </div>
               </div>
@@ -265,16 +319,6 @@
                     </span>
                   </div>
                   <div class="column">
-                    <!-- <p>
-                      Calculation done by assuming salary of RM
-                      <span id="baseSalary">🤔</span>, bonus of
-                      <span id="bonusAmount">🤔</span> month(s), EPF employee contribution rate of
-                      <span id="epfRatePercent">🤔</span> %, personal tax relief of RM
-                      <span id="personalRelief">🤔</span>, EPF relief of RM
-                      <span id="epfRelief">🤔</span> (maximum RM 4,000.00), PRS / annuity tax relief
-                      of RM <span id="taxReliefPrs">🤔</span> and other tax relief totalling RM
-                      <span id="taxReliefOthers">🤔</span>.
-                    </p> -->
                     <p>
                       <strong>Breakdown</strong>
                     </p>
@@ -370,26 +414,92 @@
                   </div>
                 </div>
               </div>
-              <!-- <div class="notification is-warning is-light">
+              <div class="notification is-success is-light">
                 <div class="columns">
                   <div class="column is-narrow">
                     <span class="icon">
-                      <i class="fas fa-exclamation"></i>
+                      <i class="fas fa-info"></i>
                     </span>
                   </div>
-
                   <div class="column">
                     <p>
-                      This tool does not take into account the inflation rate which affects your
-                      purchasing power.
+                      <strong>EPF Breakdown</strong>
                     </p>
-                    <p>
-                      For example, at an inflation rate of 3%, your income of RM 1,000 will only be
-                      worth RM 971 after one year, and RM 943 the year after.
-                    </p>
+                    <table class="table is-hoverable">
+                      <thead>
+                        <tr>
+                          <th>Item</th>
+                          <th class="has-text-right">Value (RM)</th>
+                          <th>&#8199;</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <th>
+                            Employee Contributions (<span id="epfEmployeeRatePcBkdwn">🤔</span> %)
+                          </th>
+                          <th></th>
+                          <th></th>
+                        </tr>
+                        <tr>
+                          <td>Monthly</td>
+                          <td class="has-text-right">
+                            <span id="epfEmployeeMonthlyBkdwn">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>Annual</td>
+                          <td class="has-text-right">
+                            <span id="epfEmployeeAnnualBkdwn">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <th>
+                            Employer Contributions (<span id="epfEmployerRatePcBkdwn">🤔</span> %)
+                          </th>
+                          <th></th>
+                          <th></th>
+                        </tr>
+                        <tr>
+                          <td>Monthly</td>
+                          <td class="has-text-right">
+                            <span id="epfEmployerMonthlyBkdwn">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>Annual</td>
+                          <td class="has-text-right">
+                            <span id="epfEmployerAnnualBkdwn">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <th>Total Contributions</th>
+                          <th></th>
+                          <th></th>
+                        </tr>
+                        <tr>
+                          <td>Monthly</td>
+                          <td class="has-text-right">
+                            <span id="epfTotalMonthlyBkdwn">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>Annual</td>
+                          <td class="has-text-right">
+                            <span id="epfTotalAnnualBkdwn">🤔</span>
+                          </td>
+                          <td></td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-              </div> -->
+              </div>
             </div>
           </div>
           <footer class="card-footer">

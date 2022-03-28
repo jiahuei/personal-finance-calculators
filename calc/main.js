@@ -99,6 +99,18 @@ function validateInputNumber(el) {
   return isNaN(val)
 }
 
+function computeGeometricSeries(a, r, n) {
+  console.log(`'computeGeometricSeries' inputs: 
+  a = ${a}
+  r = ${r}
+  n = ${n}`)
+  let numerator = a * (1 - Math.pow(r, n))
+  let denominator = 1 - r
+  let result = numerator / denominator
+  console.log(`'computeGeometricSeries' result: ${result}`)
+  return result
+}
+
 function computeMonthlyWithdrawal(retireAge, lifeExpectancy, retireSaving, dividendRatePercent) {
   console.log(`'computeMonthlyWithdrawal' inputs: 
   retireAge = ${retireAge}

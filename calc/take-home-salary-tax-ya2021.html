@@ -87,6 +87,9 @@
           epfTotalAnnual / 12,
         )
         document.getElementById("epfTotalAnnualBkdwn").textContent = floatToEnString(epfTotalAnnual)
+        document.getElementById("epf30YearBkdwn").textContent = floatToEnString(
+          computeGeometricSeries(epfTotalAnnual, 1.05, 30),
+        )
       }
 
       function toggleTaxReliefInputs() {
@@ -494,6 +497,13 @@
                             <span id="epfTotalAnnualBkdwn">🤔</span>
                           </td>
                           <td></td>
+                        </tr>
+                        <tr>
+                          <th>Total Savings after 30 Years at 5% Dividend</th>
+                          <th class="has-text-right">
+                            <span id="epf30YearBkdwn">🤔</span>
+                          </th>
+                          <th></th>
                         </tr>
                       </tbody>
                     </table>

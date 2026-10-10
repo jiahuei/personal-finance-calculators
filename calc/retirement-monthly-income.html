@@ -1,248 +1,173 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Retirement Monthly Income Calculator</title>
-    <!-- https://stackoverflow.com/a/42997313 -->
+    <meta
+      name="description"
+      content="Estimate the monthly budget your retirement savings could support, with clear assumptions about returns and your retirement timeline."
+    />
+    <title>Retirement Income Calculator — Ringgit / tools</title>
     <base href="../" />
-    <link rel="shortcut icon" type="image/png" href="favicon.png" />
+    <link rel="icon" href="favicon.png" />
     <link rel="stylesheet" href="style.css" />
-    <script type="text/javascript" src="calc/main.js"></script>
-    <script type="text/javascript">
-      function submitForm() {
-        let retireAge = enStringToFloat(document.getElementById("retireAgeInput").value)
-        let lifeExpectancy = enStringToFloat(document.getElementById("lifeExpectancyInput").value)
-        let retireSaving = enStringToFloat(document.getElementById("retireSavingInput").value)
-        let dividendRatePercent = enStringToFloat(
-          document.getElementById("dividendRatePercentInput").value,
-        )
-
-        // if (lifeExpectancy - retireAge <= 0) {
-        //   document
-        //     .getElementById("retireAgeInput")
-        //     .parentNode.parentNode.insertAdjacentHTML(
-        //       "beforeend",
-        //       '<p class="help is-danger">Life expectancy must be larger than retirement age.</p>',
-        //     )
-        // }
-
-        let result = computeMonthlyWithdrawal(
-          retireAge,
-          lifeExpectancy,
-          retireSaving,
-          dividendRatePercent,
-        )
-        document.getElementById("resultsStatus").textContent = ""
-        document.getElementById("monthlyWithdrawResult").textContent = floatToEnString(result)
-        result = computeMonthlyWithdrawalSimple(retireAge, lifeExpectancy, retireSaving)
-        document.getElementById("monthlyWithdrawSimpleResult").textContent = floatToEnString(result)
-        document.getElementById("yearsInRetirement").textContent = intToEnString(
-          lifeExpectancy - retireAge,
-        )
-        document.getElementById("retireSaving").textContent = intToEnString(retireSaving)
-        document.getElementById("dividendRatePercent").textContent =
-          floatToEnString(dividendRatePercent)
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        addNavBarBrand()
-        addNavBarEnd()
-        addFooter()
-        formatInputOnBlur(document.getElementById("retireAgeInput"), formatStringAsEnInt)
-        formatInputOnBlur(document.getElementById("lifeExpectancyInput"), formatStringAsEnInt)
-        formatInputOnBlur(document.getElementById("retireSavingInput"), formatStringAsEnInt)
-        formatInputOnBlur(
-          document.getElementById("dividendRatePercentInput"),
-          formatStringAsEnFloat,
-        )
-      })
-    </script>
+    <script src="calc/main.js" defer></script>
+    <script src="calc/retirement-app.js" defer></script>
   </head>
-  <body class="retire-income-bg">
-    <nav class="navbar white-70h" id="navbar" role="navigation" aria-label="main navigation">
-      <div id="navbar-menu" class="navbar-menu">
+  <body>
+    <a class="skip-link" href="calc/retirement-monthly-income.html#main">Skip to content</a>
+    <nav class="navbar" id="navbar" aria-label="Main navigation">
+      <div class="navbar-menu" id="navbar-menu">
         <div class="navbar-start">
-          <a class="navbar-item" href="index.html"> Home </a>
-          <a class="navbar-item" href="calc/take-home-salary-tax-ya2021.html">
-            Take-Home Salary & Tax Calculator
-          </a>
+          <a class="navbar-item" href="calc/take-home-salary-tax-ya2026.html">Salary &amp; tax</a
+          ><a class="navbar-item" href="calc/retirement-monthly-income.html" aria-current="page"
+            >Retirement</a
+          >
         </div>
       </div>
     </nav>
-
-    <section class="section">
-      <div class="container">
-        <h1 class="title is-2">Retirement Monthly Income Calculator</h1>
-      </div>
-    </section>
-    <section class="section pt-3 pb-3">
-      <div class="container">
-        <div class="card white-85h">
-          <div class="card-content">
-            <p class="title is-4">Fill in these information</p>
-            <form action="javascript:submitForm()">
-              <div class="columns mb-0">
-                <div class="column">
-                  <div class="field">
-                    <label class="label">Retirement Age / Current Age if Retired</label>
-                    <div class="control has-icons-left has-icons-right">
-                      <input
-                        id="retireAgeInput"
-                        class="input is-primary"
-                        type="text"
-                        placeholder="55"
-                        value="55"
-                        required
-                      />
-                      <span class="icon is-small is-left">
-                        <i class="fas fa-user"></i>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div class="column">
-                  <div class="field">
-                    <label class="label">Life Expectancy</label>
-                    <div class="control has-icons-left has-icons-right">
-                      <input
-                        id="lifeExpectancyInput"
-                        class="input is-primary"
-                        type="text"
-                        placeholder="80"
-                        value="80"
-                        required
-                      />
-                      <span class="icon is-small is-left">
-                        <i class="fas fa-user"></i>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="columns mb-0">
-                <div class="column">
-                  <div class="field">
-                    <label class="label">EPF Savings at Retirement / Investment / Savings</label>
-                    <div class="control has-icons-left has-icons-right">
-                      <input
-                        id="retireSavingInput"
-                        class="input is-primary"
-                        type="text"
-                        placeholder="1,000,000"
-                        value="1,000,000"
-                        required
-                      />
-                      <span class="icon is-small is-left">
-                        <i class="fas fa-dollar-sign"></i>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div class="column">
-                  <div class="field">
-                    <label class="label">EPF Annual Dividend Rate / ROI (%)</label>
-                    <div class="control has-icons-left has-icons-right">
-                      <input
-                        id="dividendRatePercentInput"
-                        class="input is-primary"
-                        type="text"
-                        placeholder="5.00"
-                        value="5.00"
-                        required
-                      />
-                      <span class="icon is-small is-left">
-                        <i class="fas fa-dollar-sign"></i>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="columns mt-0">
-                <div class="column">
-                  <div class="field">
-                    <div class="control">
-                      <button class="button is-link" type="submit">
-                        Click here to calculate !
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </form>
+    <main class="page" id="main">
+      <p class="breadcrumb">
+        <a href="index.html">All calculators</a> <span aria-hidden="true"> / </span> Retirement
+      </p>
+      <header class="page-heading">
+        <p class="eyebrow">Plan the next chapter</p>
+        <h1>What could your savings support?</h1>
+        <p class="intro">
+          Turn your retirement savings into a monthly budget. See how time and investment returns
+          shape your estimate.
+        </p>
+      </header>
+      <div class="workspace">
+        <section class="panel" aria-labelledby="input-title">
+          <div class="panel-heading">
+            <h2 id="input-title"><span class="step">01</span> Your retirement</h2>
           </div>
-        </div>
-      </div>
-    </section>
-    <section class="section pt-3 pb-3">
-      <div class="container">
-        <div class="card white-85h">
-          <div class="card-content">
-            <p class="title is-4">Results <span id="resultsStatus"> (pending) </span></p>
-            <div class="content">
-              <p class="subtitle is-5">
-                If you withdraw on a monthly or yearly basis: You can spend RM
-                <span id="monthlyWithdrawResult">🤔❓</span> each month.
-              </p>
-              <p class="subtitle is-5">
-                If you withdraw all at once upon retirement: You can only spend RM
-                <span id="monthlyWithdrawSimpleResult">🤔❓</span> each month.
-              </p>
-              <div class="notification is-info is-light">
-                <div class="columns">
-                  <div class="column is-narrow">
-                    <span class="icon">
-                      <i class="fas fa-info"></i>
-                    </span>
-                  </div>
-
-                  <div class="column">
-                    <p>
-                      Calculation done by assuming <span id="yearsInRetirement">🤔</span> years in
-                      retirement, with EPF savings of RM <span id="retireSaving">🤔</span> at
-                      retirement and an annual dividend rate of
-                      <span id="dividendRatePercent">🤔</span> %.
-                    </p>
-                  </div>
-                </div>
+          <form id="retirement-form">
+            <div class="field-grid">
+              <div class="field">
+                <label for="retireAgeInput">Retirement age</label
+                ><input
+                  id="retireAgeInput"
+                  name="retirementAge"
+                  type="text"
+                  inputmode="decimal"
+                  value="55"
+                  data-max="120"
+                  required
+                  aria-describedby="age-help"
+                />
+                <p class="help" id="age-help">Use your current age if already retired.</p>
               </div>
-              <div class="notification is-warning is-light">
-                <div class="columns">
-                  <div class="column is-narrow">
-                    <span class="icon">
-                      <i class="fas fa-exclamation"></i>
-                    </span>
-                  </div>
-
-                  <div class="column">
-                    <p>
-                      This tool does not take into account the inflation rate which affects your
-                      purchasing power.
-                    </p>
-                    <p>
-                      For example, at an inflation rate of 3%, your income of RM 1,000 will only be
-                      worth RM 971 after one year, and RM 943 the year after.
-                    </p>
-                  </div>
+              <div class="field">
+                <label for="lifeExpectancyInput">Plan until age</label
+                ><input
+                  id="lifeExpectancyInput"
+                  name="endAge"
+                  type="text"
+                  inputmode="decimal"
+                  value="80"
+                  data-max="120"
+                  required
+                  aria-describedby="end-help"
+                />
+                <p class="help" id="end-help">A planning horizon after your retirement age.</p>
+              </div>
+              <div class="field full">
+                <label for="retireSavingInput">Savings at retirement</label>
+                <div class="input-wrap">
+                  <span class="prefix" aria-hidden="true">RM</span
+                  ><input
+                    id="retireSavingInput"
+                    name="savings"
+                    type="text"
+                    inputmode="decimal"
+                    value="1,000,000.00"
+                    required
+                    aria-describedby="savings-help"
+                  />
                 </div>
+                <p class="help" id="savings-help">
+                  Include EPF, investments and other available savings.
+                </p>
+              </div>
+              <div class="field full">
+                <label for="dividendRatePercentInput">Annual investment return</label>
+                <div class="input-wrap percent">
+                  <input
+                    id="dividendRatePercentInput"
+                    name="return"
+                    type="text"
+                    inputmode="decimal"
+                    value="5.00"
+                    data-max="100"
+                    required
+                    aria-describedby="return-help"
+                  /><span class="suffix" aria-hidden="true">%</span>
+                </div>
+                <p class="help" id="return-help">
+                  Assumes a constant return after fees. Try 0% for a savings-only budget.
+                </p>
               </div>
             </div>
-          </div>
-          <footer class="card-footer">
-            <div class="content">
-              <p class="card-footer-item disclaimer">
-                This calculator is intended to provide estimates only and is not intended for
-                professional advice. The applicability and accuracy of the calculator is not
-                guaranteed and may vary based on your individual circumstances. All examples are
-                hypothetical and are for illustrative purposes.
-              </p>
+            <p class="error" id="form-error" role="alert" hidden></p>
+            <button class="button wide section-block" type="submit">
+              Calculate monthly budget <span aria-hidden="true">→</span>
+            </button>
+            <p class="privacy">Your inputs stay in your browser.</p>
+          </form>
+          <noscript><p class="notice">Enable JavaScript to use this calculator.</p></noscript>
+        </section>
+        <div class="results-column">
+          <section class="result-panel" aria-labelledby="result-title">
+            <p class="eyebrow" id="result-title">02 · Your estimate</p>
+            <p class="result-label">Monthly budget with investment returns</p>
+            <div class="amount">
+              <span class="currency">RM</span><span id="monthlyWithdrawResult">—</span>
             </div>
-          </footer>
+            <p class="result-sub">
+              A fixed budget over <span id="yearsInRetirement">—</span> years of retirement
+            </p>
+            <div class="result-stats">
+              <div>
+                <p>Without investment returns</p>
+                <strong id="monthlyWithdrawSimpleResult">—</strong>
+              </div>
+              <div>
+                <p>Assumed annual return</p>
+                <strong id="dividendRatePercent">—</strong>
+              </div>
+            </div>
+            <p class="result-note" id="resultsStatus" role="status" aria-live="polite">
+              Enter your details to see your estimate.
+            </p>
+          </section>
+          <section class="panel breakdown">
+            <h3>A clear starting point</h3>
+            <p class="subtle-note">
+              This budget uses your savings over your chosen timeline. It does not reserve a final
+              balance or adjust for inflation, changing returns, taxes, or unexpected expenses.
+            </p>
+            <p class="subtle-note">
+              At 3% annual inflation, RM 1,000 buys about as much as RM 971 in today’s money after
+              one year, and RM 943 after two years.
+            </p>
+          </section>
         </div>
       </div>
-    </section>
+      <section class="panel section-block">
+        <h2>How the estimate works</h2>
+        <p class="intro">
+          Your savings remain invested while you draw an equal annual amount at the start of each
+          year. We divide that amount by 12 to show a monthly budget.
+        </p>
+        <p class="subtle-note">
+          Monthly figures are averages of annual withdrawals. Actual monthly withdrawals may produce
+          a different result. At a 0% return, savings are divided evenly across the retirement
+          years. Investment returns are hypothetical and are not guaranteed.
+        </p>
+      </section>
+    </main>
     <footer class="footer" id="footer"></footer>
   </body>
 </html>

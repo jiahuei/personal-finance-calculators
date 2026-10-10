@@ -1,0 +1,6 @@
+# Independent reference repositories and generated files
+__ref__/
+node_modules/
+_site/
+docs/_build/
+__pycache__/

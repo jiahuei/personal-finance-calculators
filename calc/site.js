@@ -1,0 +1,3 @@
+addNavBarBrand()
+addNavBarEnd()
+addFooter()

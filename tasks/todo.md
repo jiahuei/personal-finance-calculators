@@ -16,4 +16,4 @@
 - [x] Configure one Pages artifact and preview comments only after successful deployment.
 - [x] Verify runtime path selection, immutable sources, closed/fork PR handling and comment updates.
 - [x] Update documentation, formatting and the dated completion record.
-- [ ] Publish the requested PR update and verify live Pages previews.
+- [x] Publish the requested PR update and verify the [live Pages preview](https://jiahuei.github.io/personal-finance-calculators/pr-preview/1/), successful deployment/comment jobs and unchanged production homepage.

@@ -16,4 +16,5 @@
 - `npm run format:check`: passed for all supported repository files.
 - `python3 -` with PyYAML: validated Pages triggers, pinned actions, deployment/comment permission boundaries, concurrency and test commands.
 - `git diff --check`: passed.
-- GitHub Pages deployment, live preview URLs and posted comments await the requested PR update; the parent agent owns publication and hosted verification.
+- [Pages run 38062806163](https://github.com/jiahuei/personal-finance-calculators/actions/runs/38062806163): packaging, deployment and preview-comment jobs passed. The first deployment was blocked by the main-only environment rule created when switching Pages to workflow publishing; allowing the intended PR merge refs resolved the restriction, and the failed job rerun passed.
+- `node /tmp/finance-hosted-preview-smoke.cjs`: 64 hosted checks passed across all 11 routes, mobile/desktop layouts, tap/blur focus, year navigation, updated graphs and preview-relative assets at the [live PR preview](https://jiahuei.github.io/personal-finance-calculators/pr-preview/1/). The production homepage was byte-identical to `git show origin/main:index.html`.

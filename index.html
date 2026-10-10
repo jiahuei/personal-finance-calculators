@@ -1,82 +1,89 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Personal Finance Calculators</title>
-    <link rel="shortcut icon" type="image/png" href="favicon.png" />
+    <meta
+      name="description"
+      content="Simple personal finance calculators for Malaysia. Estimate take-home pay, compare income tax across assessment years, and plan retirement."
+    />
+    <title>Ringgit / tools — Personal Finance Calculators for Malaysia</title>
+    <link rel="icon" href="favicon.png" />
     <link rel="stylesheet" href="style.css" />
-    <script type="text/javascript" src="calc/main.js"></script>
-    <script type="text/javascript">
-      document.addEventListener("DOMContentLoaded", () => {
-        addNavBarBrand()
-        addNavBarEnd()
-        addFooter()
-      })
-    </script>
+    <script src="calc/main.js" defer></script>
+    <script src="calc/site.js" defer></script>
   </head>
-  <body class="index-bg">
-    <nav class="navbar white-70h" id="navbar" role="navigation" aria-label="main navigation">
-      <div id="navbar-menu" class="navbar-menu">
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <nav class="navbar" id="navbar" aria-label="Main navigation">
+      <div class="navbar-menu" id="navbar-menu">
         <div class="navbar-start">
-          <a class="navbar-item" href="calc/take-home-salary-tax-ya2021.html">
-            Take-Home Salary & Tax Calculator
-          </a>
-          <a class="navbar-item" href="calc/retirement-monthly-income.html">
-            Retirement Income Calculator
-          </a>
+          <a class="navbar-item" href="calc/take-home-salary-tax-ya2026.html">Salary &amp; tax</a
+          ><a class="navbar-item" href="calc/retirement-monthly-income.html">Retirement</a>
         </div>
       </div>
     </nav>
-
-    <section class="section white-50">
-      <div class="container">
-        <h1 class="title is-1 has-text-centered">Personal Finance Calculators for Malaysia</h1>
-      </div>
-    </section>
-    <!-- https://stackoverflow.com/a/13602015 -->
-    <section
-      class="section p-0 take-home-salary-bg"
-      onclick="location.href='calc/take-home-salary-tax-ya2021.html';"
-      style="cursor: pointer"
-    >
-      <div class="container p-6 is-fluid white-50h">
-        <div class="columns is-mobile is-centered p-6 zoom-select has-text-centered">
-          <div class="column">
-            <p class="title is-4">Take-Home Salary & Tax Calculator (YA 2021)</p>
-            <p class="subtitle is-5">
-              How much of your salary can you take home after tax and EPF deductions ?
+    <main class="page" id="main">
+      <section class="home-hero">
+        <div>
+          <p class="eyebrow">Made for Malaysia</p>
+          <h1>Your money.<br />A little <em>clearer.</em></h1>
+          <p class="intro">
+            Understand what you earn today.<br />Make room for the life you want tomorrow.
+          </p>
+          <a class="button" href="calc/take-home-salary-tax-ya2026.html"
+            >Calculate your take-home pay <span aria-hidden="true">↗</span></a
+          >
+          <div class="trust-row">
+            <span>Free to use</span><span>No sign-up</span><span>Private by design</span>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="mini-card">
+            <p>A clearer view of your finances</p>
+            <strong>Make every<br />ringgit count.</strong>
+            <div class="mini-bars">
+              <span style="height: 30%"></span><span style="height: 45%"></span
+              ><span style="height: 40%"></span><span style="height: 65%"></span
+              ><span style="height: 80%"></span><span style="height: 100%"></span>
+            </div>
+            <p>Small steps. A more confident future.</p>
+          </div>
+        </div>
+      </section>
+      <section aria-labelledby="tools-title">
+        <div class="home-section-heading">
+          <p class="eyebrow">Less guesswork, better decisions</p>
+          <h2 id="tools-title">Start with the numbers.</h2>
+          <p>Practical tools for the questions that matter.</p>
+        </div>
+        <div class="tool-grid">
+          <a class="tool-card" href="calc/take-home-salary-tax-ya2026.html"
+            ><span class="tool-icon" aria-hidden="true">▤</span>
+            <h2>Salary &amp; income tax</h2>
+            <p>
+              See what’s yours after EPF, contributions and income tax. Compare the same income
+              across YA 2022–2027.
             </p>
-            <a
-              class="button is-danger is-outlined is-rounded is-medium"
-              href="calc/take-home-salary-tax-ya2021.html"
-            >
-              Click here to find out
-            </a>
-          </div>
+            <p><span class="badge">Includes Budget 2027 preview</span></p>
+            <span class="card-link"
+              >Explore the calculator <span aria-hidden="true">↗</span></span
+            ></a
+          ><a class="tool-card" href="calc/retirement-monthly-income.html"
+            ><span class="tool-icon" aria-hidden="true">↗</span>
+            <h2>Your retirement income</h2>
+            <p>
+              Turn your savings into a monthly income estimate. Explore how your retirement timeline
+              and returns change the picture.
+            </p>
+            <span class="card-link">Plan your retirement <span aria-hidden="true">↗</span></span></a
+          >
         </div>
-      </div>
-    </section>
-    <section
-      class="section p-0 retire-income-bg"
-      onclick="location.href='calc/retirement-monthly-income.html';"
-      style="cursor: pointer"
-    >
-      <div class="container p-6 is-fluid white-50h">
-        <div class="columns is-mobile is-centered p-6 zoom-select has-text-centered">
-          <div class="column">
-            <p class="title is-4">Retirement Monthly Income Calculator</p>
-            <p class="subtitle is-5">How much you can spend monthly when you retire ?</p>
-            <a
-              class="button is-danger is-outlined is-rounded is-medium"
-              href="calc/retirement-monthly-income.html"
-            >
-              Click here to find out
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
+      <p class="subtle-note">
+        Estimates for planning, with transparent assumptions. Your inputs stay in your browser.
+      </p>
+    </main>
     <footer class="footer" id="footer"></footer>
   </body>
 </html>

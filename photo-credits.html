@@ -1,76 +1,82 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Personal Finance Calculators</title>
-    <link rel="shortcut icon" type="image/png" href="favicon.png" />
+    <meta
+      name="description"
+      content="Credits for photographs included in the Ringgit / tools project."
+    />
+    <title>Photo Credits — Ringgit / tools</title>
+    <link rel="icon" href="favicon.png" />
     <link rel="stylesheet" href="style.css" />
-    <script type="text/javascript" src="calc/main.js"></script>
-    <script type="text/javascript">
-      document.addEventListener("DOMContentLoaded", () => {
-        addNavBarBrand()
-        addNavBarEnd()
-        addFooter()
-      })
-    </script>
+    <script src="calc/main.js" defer></script>
+    <script src="calc/site.js" defer></script>
   </head>
   <body>
-    <nav class="navbar white-70h" id="navbar" role="navigation" aria-label="main navigation">
-      <div id="navbar-menu" class="navbar-menu">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <nav class="navbar" id="navbar" aria-label="Main navigation">
+      <div class="navbar-menu" id="navbar-menu">
         <div class="navbar-start">
-          <a class="navbar-item" href="index.html"> Home </a>
-          <a class="navbar-item" href="calc/retirement-monthly-income.html">
-            Retirement Income Calculator
-          </a>
-          <a class="navbar-item" href="calc/take-home-salary-tax-ya2021.html">
-            Take-Home Salary & Tax Calculator
-          </a>
+          <a class="navbar-item" href="calc/take-home-salary-tax-ya2026.html">Salary &amp; tax</a
+          ><a class="navbar-item" href="calc/retirement-monthly-income.html">Retirement</a>
         </div>
       </div>
     </nav>
-    <section class="hero is-medium index-bg">
-      <div class="hero-body">
-        <div class="columns is-mobile is-centered has-text-centered">
-          <div class="column">
-            <a
-              class="button is-light is-rounded title is-4 is-multiline"
-              href="https://unsplash.com/@kaiyu_wu?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText"
-            >
-              Photo by Kaiyu Wu on Unsplash
-            </a>
-          </div>
-        </div>
+    <main class="page" id="main">
+      <p class="breadcrumb">
+        <a href="index.html">Home</a> <span aria-hidden="true"> / </span> Photo credits
+      </p>
+      <header class="page-heading">
+        <p class="eyebrow">The people behind the pictures</p>
+        <h1>Photo credits.</h1>
+        <p class="intro">
+          Thanks to the photographers whose work is included in this project’s image collection.
+        </p>
+      </header>
+      <div class="credit-grid">
+        <figure class="credit-card">
+          <img
+            src="img/Photo by Kaiyu Wu on Unsplash (HD q30).jpg"
+            alt="A tall building in mist, photographed by Kaiyu Wu"
+            loading="lazy"
+          />
+          <figcaption>
+            <a href="https://unsplash.com/@kaiyu_wu">Kaiyu Wu on Unsplash ↗</a>
+          </figcaption>
+        </figure>
+        <figure class="credit-card">
+          <img
+            src="img/Photo by Michael Longmire on Unsplash (QHD q25).jpg"
+            alt="Coins spilling from a glass jar, photographed by Michael Longmire"
+            loading="lazy"
+          />
+          <figcaption>
+            <a href="https://unsplash.com/@f7photo">Michael Longmire on Unsplash ↗</a>
+          </figcaption>
+        </figure>
+        <figure class="credit-card">
+          <img
+            src="img/Photo by Visual Stories Micheile on Unsplash (QHD q30).jpg"
+            alt="A seedling growing above coins, photographed by Visual Stories Micheile"
+            loading="lazy"
+          />
+          <figcaption>
+            <a href="https://unsplash.com/@micheile">Visual Stories / Micheile on Unsplash ↗</a>
+          </figcaption>
+        </figure>
+        <figure class="credit-card">
+          <img
+            src="img/Photo by Annie Spratt on Unsplash (QHD q25).jpg"
+            alt="A ceramic unicorn on a shelf, photographed by Annie Spratt"
+            loading="lazy"
+          />
+          <figcaption>
+            <a href="https://unsplash.com/@anniespratt">Annie Spratt on Unsplash ↗</a>
+          </figcaption>
+        </figure>
       </div>
-    </section>
-    <section class="hero is-medium retire-income-bg">
-      <div class="hero-body">
-        <div class="columns is-mobile is-centered has-text-centered">
-          <div class="column">
-            <a
-              class="button is-light is-rounded title is-4 is-multiline"
-              href="https://unsplash.com/@f7photo?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText"
-            >
-              Photo by Michael Longmire on Unsplash
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="hero is-medium take-home-salary-bg">
-      <div class="hero-body">
-        <div class="columns is-mobile is-centered has-text-centered">
-          <div class="column">
-            <a
-              class="button is-light is-rounded title is-4 is-multiline"
-              href="https://unsplash.com/@micheile?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText"
-            >
-              Photo by Visual Stories || Micheile on Unsplash
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
+    </main>
     <footer class="footer" id="footer"></footer>
   </body>
 </html>

@@ -43,6 +43,22 @@ PLAYWRIGHT_MODULE=/tmp/ringgit-browser-tests/node_modules/playwright node tests/
 
 Run the local server first. If your OS lacks browser libraries, follow Playwright’s platform dependency setup. `TEST_BASE_URL` overrides the server URL; `TEST_SCREENSHOTS` saves screenshots to a chosen directory. The suite checks all 11 routes at 320, 375, 768 and 1440 pixels, including expanded tables, mobile touch/focus, year selection, updated charts, source links, validation, and retirement results. Mobile emulation verifies browser behavior; physical iOS Safari remains a separate device check.
 
+## Published site and PR previews
+
+The [Pages workflow](.github/workflows/pages.yml) publishes the current remote `main` site at the project root and each open same-repository pull request at `pr-preview/<number>/`. A successful deployment creates or updates one PR comment with the preview URL and exact source commit. Closing a PR removes its snapshot and updates its existing comment after the next successful deployment. Fork PRs do not receive hosted previews.
+
+The workflow runs on pushes to `main`, PR opening, reopening, new commits and closing, or manual dispatch. Runs share the `pages` concurrency group and do not cancel an active deployment. Every run reads current API refs so a delayed event cannot restore an older main site or closed preview. Only the configured runtime paths in `scripts/pages-preview.json` are copied from regular Git blobs; no PR build scripts run, and repository tooling, dependencies and internal references are not published.
+
+GitHub Pages must use GitHub Actions as its publishing source. The `github-pages` environment must permit the intended main and same-repository PR workflow refs. Deployment permissions are isolated from the packaging and comment jobs. Preview comments run only after deployment succeeds.
+
+Packaging and comment regression tests use Node and Git without extra dependencies:
+
+```sh
+node --test tests/pages-preview.test.cjs
+```
+
+These tests verify production/preview separation, project-relative assets, API pagination, closed and fork PR handling, path/symlink safety and stable comment updates. `_site/` is generated output and is ignored by Git and Prettier.
+
 ## Tax rules and assumptions
 
 Reviewed **10 October 2026**. Source links and assumptions also appear within each calculator.

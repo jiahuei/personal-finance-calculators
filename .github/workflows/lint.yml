@@ -33,3 +33,6 @@ jobs:
 
       - name: Check files using Prettier
         run: npm run format:check
+
+      - name: Verify preview snapshot packaging
+        run: node --test tests/pages-preview.test.cjs

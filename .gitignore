@@ -3,6 +3,7 @@ __ref__/
 
 # Development dependencies
 node_modules/
+_site/
 
 # Original full-size images
 /img/ori/

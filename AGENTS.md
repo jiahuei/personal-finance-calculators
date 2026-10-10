@@ -8,17 +8,15 @@ The user's job as a senior software engineer is dependent on you implementing cl
 
 ```text
 .
-├── .github/workflows/  # CI, release, and documentation workflows
-├── assets/            # Shared images and branding
-├── charts/            # Helm charts
-├── docker/            # Dockerfiles and Compose configurations
-├── docs/              # User and developer documentation
-├── k8s/               # Kubernetes deployment configuration
-├── scripts/           # Development and documentation scripts
-├── services/
-│   ├── api/           # FastAPI/SQLModel backend and tests
-│   └── studio/        # Svelte frontend
-└── tools/             # Maintenance utilities
+├── index.html         # Calculator home page
+├── photo-credits.html # Image attribution
+├── style.css          # Shared responsive styling
+├── calc/              # Calculator pages, applications and calculation engine
+├── img/               # Project photographs
+├── tests/             # Node calculation and optional Playwright browser tests
+├── tasks/             # Plans and dated completion records
+├── .prettierrc.json    # Formatting configuration
+└── README.md          # Local setup, tests and calculation assumptions
 ```
 
 ## Core Principles
@@ -39,7 +37,7 @@ The user's job as a senior software engineer is dependent on you implementing cl
   3. Review the full diff for unnecessary abstractions, branches, defensive code, and overly strict guarantees.
   4. Prefer sufficient correctness over absolute correctness: for example, eventual consistency when acceptable, or simple retries when failure is cheap and recoverable.
   5. Remove or relax requirements that do not justify their complexity. Simplify immediately when behavior is preserved; otherwise present the proposed change, benefits, and trade-offs to the user.
-- **Protect Secrets in Command Output**: When validating Compose files that use environment files, use `docker compose config --quiet`. Do not print fully resolved Compose configuration because it expands secret environment values into command output.
+- **Protect Secrets in Command Output**: Do not print secret environment values or configuration that expands them. Use quiet validation when supported.
 
 ## Workflow Orchestration
 
@@ -76,7 +74,7 @@ The user's job as a senior software engineer is dependent on you implementing cl
 - Distinguish failures introduced by the current change from pre-existing or environment-dependent failures.
 - Verify the behavior affected by the change, not merely that the code compiles.
 - Add or update regression tests when fixing a reproducible defect.
-- All tests must have a docstring stating their intention, goal, purpose, or the regression they guard against. For example: "Ensures ..." or "Asserts that ...".
+- All tests must have a JSDoc comment stating their intention, goal, purpose, or the regression they guard against. For example: "Ensures ..." or "Asserts that ...".
 - Compare behavior before and after the change when practical.
 - Run the applicable checks defined in the Linting Workflow.
 - Always check whether any project documentation needs updating, even when documentation was not mentioned in the task. Update all affected docs before reporting completion.
@@ -84,30 +82,18 @@ The user's job as a senior software engineer is dependent on you implementing cl
 
 #### Local development environment
 
-- Use `uv` when available.
-- Run backend tests from the repository root: `uv run --project services/api --extra test pytest services/api/tests/`. Pytest config lives in `services/api/pyproject.toml`; the `.env` at the repo root feeds `ENV_CONFIG` (pydantic-settings).
-- Docker is available on the host. Shared-service tests use `docker/compose.dev.yml`. Tests marked `onprem` require model deployment infrastructure.
-- Run parallel tests with `pytest services/api/tests/ -m "not serial and not onprem" -n auto --dist worksteal`, then shared-service tests with `pytest services/api/tests/ -m "serial and not onprem" -n 0`.
-- Use `setup_test_db` for isolated async database tests. See `docs/Guides-for-Devs/testing-and-ci.md` for test isolation guidance.
-
-For backend changes requiring running services:
-
-1. Validate the Compose configuration without exposing secrets: `docker compose -p tv --env-file .env -f docker/compose.dev.yml config --quiet`
-2. Start only the services required by the affected tests.
-3. Rebuild or force-recreate services only when the change requires it.
-4. Verify readiness using configured health checks, service status, relevant logs, or an explicit endpoint probe.
-5. Run the narrowest relevant tests first.
-6. For substantial or shared backend changes, run: `pytest services/api/tests/ -m "not onprem"`; include on-prem tests when the scope requires them and the environment supports them.
+- This is a static HTML/CSS/JavaScript site with no build step or runtime dependencies.
+- Serve it from the repository root: `python3 -m http.server 8000 --bind 127.0.0.1`.
+- Run calculation and input-validation tests: `node --test tests/calculators.test.js`.
+- If child processes are restricted, use `node tests/calculators.test.js`, or `node --test --test-isolation=none tests/calculators.test.js` with a recent Node release.
+- For changes affecting browser behavior or layout, follow the optional Playwright setup in [README.md](README.md#tests) and run `node tests/browser.test.cjs` with the documented module path and local server.
+- Inspect relevant desktop and mobile screenshots for layout changes. Distinguish browser mobile emulation from physical-device verification.
 
 Before reporting completion, review the final diff and ask:
 
 - Does every change relate to a requirement?
 - Did the change introduce unnecessary complexity or scope?
 - Would a staff engineer approve the implementation and verification evidence?
-
-#### Python Tests
-
-- Run tests (especially async tests that invoke the OpenAI or Anthropic SDK) with escalated permissions on the first attempt. Their first-request platform detection uses `asyncio.to_thread()`, while the sandbox blocks the Unix socketpair wakeup that asyncio uses to deliver the worker result. Inside the sandbox these tests can therefore stall before reaching `MockTransport`; this is an environment limitation, not a cassette or SDK parsing failure.
 
 ### 5. Demand Elegance (Balanced)
 
@@ -125,46 +111,29 @@ Before reporting completion, review the final diff and ask:
 
 ### 7. Task Management
 
-1. **Plan First**: Write plan to `tasks/todo.md` with checkable items
-2. **Verify Plan**: Check in before starting implementation
-3. **Track Progress**: Mark items complete as you go
+1. **Plan First**: Write checkable items to `tasks/todo.md` when [Task Tracking](#3-task-tracking) calls for persistent tracking.
+2. **Communicate Plan**: Share the approach before implementation; proceed without approval when authorized and clear.
+3. **Track Progress**: Mark tracked items complete as you go.
 4. **Explain Changes**: High-level summary at each step
 5. **Document Results**: Create the dated completion record in `tasks/` using the required [PR description format](#pr-descriptions).
-6. **Capture Lessons**: Update `tasks/lessons.md` after corrections
+6. **Capture Lessons**: Update `tasks/lessons.md` only for durable, project-specific lessons as described above.
 
 ### 8. Linting Workflow
 
 - Run formatting, linting, and static analysis after implementation and before reporting completion.
-- The `.github/workflows/lint.yml` workflow is the source of truth. Before running checks, inspect it and use the commands, installation method, configuration, and tool versions selected by that workflow. Do not substitute globally installed tools or copy version numbers into this document.
-- Start with changed files for fast feedback, then run the applicable repository-wide checks used by CI.
-- When editing or creating Markdown files, run every applicable formatting or linting checks.
+- Use `.prettierrc.json` for formatting. This repository currently has no CI lint workflow or package-defined lint commands; inspect any workflow or tooling added later before selecting checks.
+- Start with changed files for fast feedback, then run the repository-wide formatting check.
+- When editing or creating Markdown files, run the applicable formatting checks.
 
 Always run `npx prettier` commands with escalated permissions on the first attempt. Do not try them in the sandbox first because `npx` requires registry and cache access to resolve Prettier.
 
-Do not format unrelated files merely to make a repository-wide check pass.
-
-#### Backend
-
 From the repository root:
 
-1. Inspect the Ruff installation and check steps in `.github/workflows/lint.yml`.
-2. Install or select Ruff using the workflow's current version constraint.
-3. Confirm the selected version: `ruff --version`
-4. Format changed Python files: `ruff format --config services/api/pyproject.toml <changed-python-files>`
-5. Check changed Python files: `ruff check --config services/api/pyproject.toml <changed-python-files>`
-6. Run the same repository-wide Ruff format check and lint check configured in CI.
-
-Do not run automatic fixes across the entire repository unless explicitly required by the task.
-
-#### Frontend
-
-From `services/studio`:
-
-1. Inspect the Prettier installation and formatting steps in `.github/workflows/lint.yml`.
-2. Use the Prettier version and invocation selected by that workflow.
-3. Format and check changed files before running the same repository-wide formatting check configured in CI.
-4. Run ESLint and the package's formatting check: `npm run lint`
-5. Run Svelte and TypeScript diagnostics: `npm run check`
+1. Format changed supported files: `npx prettier --write <changed-files>`.
+2. Check changed files: `npx prettier --check <changed-files>`.
+3. Run the repository-wide formatting check: `npx prettier --check .`.
+4. For JavaScript changes, run `node --check <changed-javascript-file>` for each changed file.
+5. Run the applicable calculation or browser tests described above. Documentation-only changes do not require application tests.
 
 Do not format unrelated files merely to make a repository-wide check pass.
 
@@ -215,7 +184,7 @@ Do not format unrelated files merely to make a repository-wide check pass.
 - When writing prompts, avoid using non-ASCII symbols.
 - Follow the existing code style in each file.
 - Use meaningful variable and function names.
-- **Pin dependency versions**: Use exact versions (e.g. `"2.0.0"`) in `package.json` and `pyproject.toml`. Never use caret (`^`) or tilde (`~`) ranges.
+- **Pin dependency versions**: If dependencies are added, use exact versions (e.g. `"2.0.0"`) in their manifests and setup commands. Never use caret (`^`) or tilde (`~`) ranges.
 
 ### Code Comments
 
@@ -232,10 +201,6 @@ Do not format unrelated files merely to make a repository-wide check pass.
 - Comments should explain **why** the implementation exists, what constraint or decision led to it, and — when useful — what could go wrong if it is changed.
 - Do not add comments that simply restate the code, narrate each operation, or compensate for unnecessarily complicated implementation.
 - Keep comments accurate when modifying the associated code. Remove comments that are obsolete, misleading, or no longer useful.
-
-### Backend Conventions
-
-Always follow `services/api/CONVENTIONS-BACKEND.md`.
 
 ## Code Review and Refactoring Guidelines
 
@@ -254,10 +219,7 @@ Always follow `services/api/CONVENTIONS-BACKEND.md`.
 
 ## Release Tagging
 
-- Existing release tags in this repository are annotated tags, not lightweight tags.
-- Before creating a release tag, fetch the latest main branch and tags: `git fetch origin main --tags`
-- Verify the intended tag target before tagging: `git rev-parse main`, `git rev-parse origin/main`, and `git rev-parse FETCH_HEAD`
-- Create release tags as annotated tags using the existing message style: `git tag -a vYYYY.MM.DD <commit-sha> -m 'Release YYYY.MM.DD'`
-- Verify the new tag is annotated and points at the intended commit: `git for-each-ref refs/tags/vYYYY.MM.DD --format='%(refname:short) %(objecttype) %(objectname) %(*objectname) %(contents:subject)'`
-- Push only the release tag: `git push origin vYYYY.MM.DD`
-- If a lightweight tag is created locally by mistake, delete and recreate it as annotated before pushing: `git tag -d vYYYY.MM.DD`
+- Create or push release tags only when requested by the user.
+- Before tagging, fetch the relevant remote branch and tags, inspect existing tag names, types and messages, and follow the verified repository convention.
+- If no convention exists, prefer an annotated tag; do not invent a version or date scheme.
+- Verify the intended commit and the new tag's type and target before pushing only the requested tag.

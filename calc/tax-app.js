@@ -15,7 +15,7 @@ el("main").insertAdjacentHTML(
   "beforeend",
   `
   <p class="breadcrumb"><a href="index.html">All calculators</a> <span aria-hidden="true"> / </span> Salary &amp; tax</p>
-  <header class="page-heading"><p class="eyebrow">Your income, understood</p><h1>Make sense of your salary.</h1><p class="intro">From gross pay to what’s yours. Estimate your Malaysian income tax and see how it changes through the years.</p></header>
+  <header class="page-heading"><p class="eyebrow">Salary &amp; income tax</p><h1>Your take-home pay and income tax</h1><p class="intro">Estimate your Malaysian income tax and take-home pay, then compare the same income across assessment years.</p></header>
   <div class="workspace"><section class="panel" aria-labelledby="input-title"><div class="panel-heading"><h2 id="input-title"><span class="step">01</span> Your details</h2><span class="badge">Malaysian tax resident</span></div>
     <form id="tax-form"><div class="field"><label for="assessmentYear">Year of assessment</label><select id="assessmentYear" name="assessmentYear">${TaxEngine.years
       .slice()
@@ -27,17 +27,17 @@ el("main").insertAdjacentHTML(
       .join(
         "",
       )}</select><p class="help">The year you earn the income, usually filed in the following year.</p></div>
-    <div class="notice" id="proposal-notice" ${selectedYear !== 2027 ? "hidden" : ""}><strong>YA 2027 · Budget proposal</strong><br>Models the proposed RM 12,000 personal relief, 18% and 24% bands, and 30% above RM 1 million. Other rules are carried forward. Subject to legislation and final HASiL guidance. <a href="${source.budget2027}">Budget 2027 speech ↗</a></div>
+    <div class="notice" id="proposal-notice" ${selectedYear !== 2027 ? "hidden" : ""}><strong>YA 2027 · Budget proposal</strong><br>Models proposed RM 12,000 personal relief, 18% and 24% bands and 30% above RM 1 million. Other rules are carried forward pending legislation and final HASiL guidance. <a href="${source.budget2027}">Budget 2027 speech ↗</a></div>
     <fieldset class="form-section"><legend>Income</legend><div class="field-grid">${field("salary", "Monthly salary", "7,500.00", "RM", "Include taxable fixed allowances.")}${field("bonus", "Annual bonus", "0.00", "months", "Bonus as a multiple of monthly salary.")}</div></fieldset>
-    <fieldset class="form-section"><legend>Contributions</legend><div class="field-grid">${field("employeeRate", "Employee EPF rate", "11.00", "%", "Use your actual average rate for this year.", 100)}${field("employerRate", "Employer EPF rate", "12.00", "%", "Use your employer’s applicable rate.", 100)}</div><label class="check-row"><input id="social" type="checkbox" checked> Include employee SOCSO &amp; EIS (under 60)</label><p class="help">Standard contributions; excludes optional LINDUNG 24 Jam. EPF is estimated on salary and bonus. Historical EPF rates may vary within a year.</p></fieldset>
-    <fieldset class="form-section"><legend>Annual tax reliefs</legend><div class="field-grid">${field("prs", "PRS / deferred annuity paid", "0.00", "RM", "Full annual payment; relief capped at RM 3,000.")}${field("otherReliefs", "Other eligible reliefs", "0.00", "RM", "Enter your eligible total for the selected YA. Exclude personal, EPF, PRS and SOCSO/EIS reliefs already included.")}</div><p class="help">Check each year’s limits in the <a href="${source.reliefs}">HASiL relief guide ↗</a>.</p></fieldset>
+    <fieldset class="form-section"><legend>Contributions</legend><div class="field-grid">${field("employeeRate", "Employee EPF rate", "11.00", "%", "Use your actual average rate for this year.", 100)}${field("employerRate", "Employer EPF rate", "12.00", "%", "Use your employer’s applicable rate.", 100)}</div><label class="check-row"><input id="social" type="checkbox" checked> Include employee SOCSO &amp; EIS (under 60)</label><p class="help">Uses the standard employee bands and excludes optional LINDUNG 24 Jam. EPF is estimated on salary and bonus, and historical rates may vary within a year.</p></fieldset>
+    <fieldset class="form-section"><legend>Annual tax reliefs</legend><div class="field-grid">${field("prs", "PRS / deferred annuity paid", "0.00", "RM", "Enter the full annual payment; the relief is capped at RM 3,000.")}${field("otherReliefs", "Other eligible reliefs", "0.00", "RM", "Personal, EPF, PRS and SOCSO/EIS reliefs are added automatically, so enter only your remaining reliefs here, such as lifestyle, medical or childcare.")}</div><p class="help">Check each year’s limits in the <a href="${source.reliefs}">HASiL relief guide ↗</a>.</p></fieldset>
     <label class="check-row"><input id="ignoreReliefs" type="checkbox"> Compare without tax reliefs or the personal rebate</label>
-    <p class="error" id="form-error" role="alert" hidden></p><button type="submit" class="button wide">Calculate take-home pay <span aria-hidden="true">→</span></button><p class="privacy">No account. No data sent. Just your numbers.</p></form></section>
-  <div class="results-column"><section class="result-panel" aria-labelledby="result-title"><p class="eyebrow" id="result-title">02 · Your estimate <span id="result-year"></span></p><p class="result-label">Average monthly take-home</p><div class="amount"><span class="currency">RM</span><span id="monthly-net">—</span></div><p class="result-sub"><span id="annual-net">—</span> per year, including bonus</p><div class="allocation" aria-hidden="true"><span class="net" id="net-bar"></span><span class="epf" id="epf-bar"></span><span class="tax" id="tax-bar"></span><span class="other" id="other-bar"></span></div><div class="result-stats"><div><p>Annual income tax</p><strong id="annual-tax">—</strong></div><div><p>Effective tax rate</p><strong id="effective-rate">—</strong></div><div><p>Employee EPF / year</p><strong id="annual-epf">—</strong></div><div><p>Tax / month, averaged</p><strong id="monthly-tax">—</strong></div></div><p class="result-note" id="result-status" role="status" aria-live="polite">Based on the details entered.</p></section>
-  <section class="panel breakdown"><h3>Where your money goes</h3><div id="pay-breakdown"></div><p class="subtle-note">Monthly figures are annual averages, not a PCB deduction or a payslip. PRS payments are deducted from available cash.</p></section></div></div>
-  <section class="panel section-block"><details id="calculation-details"><summary>Behind the numbers · tax &amp; EPF breakdown</summary><div class="source-grid"><div><h3>From income to tax</h3><div id="tax-breakdown"></div></div><div><h3>Your EPF savings</h3><div id="epf-breakdown"></div><p class="subtle-note">The 30-year illustration assumes unchanged annual contributions deposited at year end and 5% annual returns. Returns are not guaranteed.</p></div></div><div class="table-scroll section-block"><table><caption id="bracket-caption"></caption><thead><tr><th scope="col">Chargeable income band (RM)</th><th scope="col">Rate</th><th scope="col">Tax in band (RM)</th></tr></thead><tbody id="bracket-rows"></tbody></table></div></details></section>
-  <section class="panel section-block" aria-labelledby="sources-title"><details><summary id="sources-title">Sources &amp; calculation assumptions</summary><div class="source-grid"><div><a href="${source.rates}">HASiL · YA 2020–2025 tax rates ↗</a><p>Progressive resident individual tax schedules, including the change from YA 2023.</p><a href="${source.mtd2026}">HASiL · 2026 calculation specification ↗</a><p>YA 2026 uses the continuing resident bands in the 2026 MTD specification.</p></div><div><a href="${source.budget2027}">Prime Minister’s Office · Budget 2027 ↗</a><p>Speech of 9 October 2026, paragraphs 29–30. YA 2027 estimates apply the announced changes, with unmentioned bands and relief caps carried forward. This is a proposal, not a final tax schedule.</p></div><div><a href="${source.reliefs}">HASiL · reliefs by assessment year ↗</a><p>Automatically includes personal relief, employee EPF up to RM 4,000, PRS up to RM 3,000 and SOCSO/EIS contributions up to RM 350 from YA 2022, or SOCSO alone up to RM 250 in YA 2020–2021. Other reliefs must be entered within the applicable annual limits.</p><a href="${source.socialRelief2022}">Ministry of Finance · 2022 SOCSO/EIS relief change ↗</a><a href="${source.prs}">Ministry of Finance · PRS extension ↗</a><p>Budget 2025 tax measures, Appendix 4: extension through YA 2030.</p></div><div><a href="${source.rebate}">MIDA · resident individual tax rebate ↗</a><p>RM 400 personal rebate for chargeable income up to RM 35,000, capped at tax charged. Joint assessment, spouse rebates, zakat and special tax regimes are not modelled.</p></div><div><a href="${source.socso}">PERKESO · contribution schedules ↗</a><p>Standard employee SOCSO and EIS bands. Annual estimates account for the September 2022 and October 2024 wage-ceiling changes. Excludes optional LINDUNG 24 Jam contributions.</p><a href="${source.socso2022}">PERKESO · September 2022 circular ↗</a></div><div><a href="${source.epf}">KWSP · mandatory contributions ↗</a><p>EPF is a percentage estimate on salary and bonus, using your entered rates. Actual contributions follow KWSP’s statutory schedule and rounding. Employer contributions do not reduce take-home pay.</p></div></div><p class="subtle-note">Reviewed 10 October 2026. Assumes a full year of constant employment income for a Malaysian resident individual under 60. Other reliefs are an eligible amount you supply, not an automatic eligibility assessment. Estimates are for planning and are not tax advice.</p></details></section>
-  <section class="panel chart-panel" aria-labelledby="comparison-title"><div class="panel-heading"><h2 id="comparison-title">Same income. Different years.</h2><span class="badge">YA 2022–2027</span></div><p class="intro" id="comparison-description"></p><div class="chart-key"><span>Published rules</span><span class="proposal">2027 budget proposal</span></div><div id="tax-chart"></div><p class="chart-summary" id="comparison-summary"></p><p class="subtle-note">Salary, bonus, EPF rates, PRS payments and other entered reliefs stay constant. Automatic reliefs and tax bands follow each YA. Check that your other reliefs qualify in every year. Dashed segment: proposed YA 2027 rules.</p><details class="chart-table" open><summary>View exact yearly amounts</summary><div class="table-scroll"><table><caption>Same-income comparison, after eligible personal rebate</caption><thead><tr><th scope="col">Assessment year</th><th scope="col">Chargeable income</th><th scope="col">Annual tax</th><th scope="col">Effective rate</th></tr></thead><tbody id="comparison-rows"></tbody></table></div></details></section>`,
+    <p class="error" id="form-error" role="alert" hidden></p><p class="privacy">Results update as you type and your inputs never leave this browser.</p></form></section>
+  <div class="results-column"><section class="result-panel" aria-labelledby="result-title"><p class="eyebrow" id="result-title">02 · Your estimate <span id="result-year"></span></p><p class="result-label">Average monthly take-home</p><div class="amount"><span class="currency">RM</span><span id="monthly-net">—</span></div><p class="result-sub"><span id="annual-net">—</span> per year, including bonus</p><p class="allocation-title">Annual income allocation</p><p class="allocation-note" id="allocation-note" hidden></p><div class="allocation" id="allocation" role="img" aria-label="Share of gross income"><span class="net" id="net-bar"></span><span class="epf" id="epf-bar"></span><span class="tax" id="tax-bar"></span><span class="other" id="other-bar"></span></div><div class="allocation-key"><span class="net" id="net-allocation"></span><span class="epf" id="epf-allocation"></span><span class="tax" id="tax-allocation"></span><span class="other" id="other-allocation"></span></div><div class="result-stats"><div><p>Annual income tax</p><strong id="annual-tax">—</strong></div><div><p>Effective tax rate</p><strong id="effective-rate">—</strong></div><div><p>Employee EPF / year</p><strong id="annual-epf">—</strong></div><div><p>Tax / month, averaged</p><strong id="monthly-tax">—</strong></div></div><p class="result-note" id="result-status" role="status" aria-live="polite">Based on the details entered.</p></section>
+  <section class="panel breakdown"><h3>Where your money goes</h3><div id="pay-breakdown"></div><p class="subtle-note">Monthly figures are annual averages rather than actual PCB deductions or payslip amounts, and PRS payments reduce the cash available to you.</p></section></div></div>
+  <section class="panel section-block"><details id="calculation-details"><summary>Tax &amp; EPF breakdown</summary><div class="source-grid"><div><h3>From income to tax</h3><div id="tax-breakdown"></div></div><div><h3>Your EPF savings</h3><div id="epf-breakdown"></div><p class="subtle-note">The 20-year illustration assumes unchanged annual contributions deposited at year end and 5% annual returns, which are not guaranteed.</p></div></div><div class="table-scroll section-block"><table><caption id="bracket-caption"></caption><thead><tr><th scope="col">Chargeable income band (RM)</th><th scope="col">Rate</th><th scope="col">Tax in band (RM)</th></tr></thead><tbody id="bracket-rows"></tbody></table></div></details></section>
+  <section class="panel section-block" aria-labelledby="sources-title"><details><summary id="sources-title">Sources &amp; calculation assumptions</summary><div class="source-grid"><div><a href="${source.rates}">HASiL · YA 2020–2025 tax rates ↗</a><p>Progressive resident individual tax schedules, including the change from YA 2023.</p><a href="${source.mtd2026}">HASiL · 2026 calculation specification ↗</a><p>YA 2026 uses the continuing resident bands in the 2026 MTD specification.</p></div><div><a href="${source.budget2027}">Prime Minister’s Office · Budget 2027 ↗</a><p>Speech of 9 October 2026, paragraphs 29–30. YA 2027 estimates apply the announced changes, with unmentioned bands and relief caps carried forward. The schedule is a Budget proposal and has not been enacted.</p></div><div><a href="${source.reliefs}">HASiL · reliefs by assessment year ↗</a><p>Automatically includes personal relief, employee EPF up to RM 4,000, PRS up to RM 3,000 and SOCSO/EIS contributions up to RM 350 from YA 2022, or SOCSO alone up to RM 250 in YA 2020–2021. Other reliefs must be entered within the applicable annual limits.</p><a href="${source.socialRelief2022}">Ministry of Finance · 2022 SOCSO/EIS relief change ↗</a><a href="${source.prs}">Ministry of Finance · PRS extension ↗</a><p>Budget 2025 tax measures, Appendix 4: extension through YA 2030.</p></div><div><a href="${source.rebate}">MIDA · resident individual tax rebate ↗</a><p>RM 400 personal rebate for chargeable income up to RM 35,000, capped at tax charged. Joint assessment, spouse rebates, zakat and special tax regimes are not modelled.</p></div><div><a href="${source.socso}">PERKESO · contribution schedules ↗</a><p>Standard employee SOCSO and EIS bands. Annual estimates account for the September 2022 and October 2024 wage-ceiling changes. Excludes optional LINDUNG 24 Jam contributions.</p><a href="${source.socso2022}">PERKESO · September 2022 circular ↗</a></div><div><a href="${source.epf}">KWSP · mandatory contributions ↗</a><p>EPF is a percentage estimate on salary and bonus, using your entered rates. Actual contributions follow KWSP’s statutory schedule and rounding. Employer contributions do not reduce take-home pay.</p></div></div><p class="subtle-note">Reviewed 10 October 2026. Assumes a full year of constant employment income for a Malaysian resident individual under 60. You supply the eligible amount for other reliefs, so confirm that each one applies to you. Estimates are for planning and are not tax advice.</p></details></section>
+  <section class="panel chart-panel" aria-labelledby="comparison-title"><div class="panel-heading"><h2 id="comparison-title">The same income in other years</h2><span class="badge">YA 2022–2027</span></div><p class="intro" id="comparison-description"></p><div class="chart-key"><span>Published rules</span><span class="proposal">2027 budget proposal</span></div><div id="tax-chart"></div><p class="chart-summary" id="comparison-summary"></p><p class="subtle-note">Salary, bonus, EPF rates, PRS payments and other entered reliefs stay constant. Automatic reliefs and tax bands follow each YA. Check that your other reliefs qualify in every year. Dashed segment: proposed YA 2027 rules.</p><details class="chart-table" open><summary>View exact yearly amounts</summary><div class="table-scroll"><table><caption>Same-income comparison, after eligible personal rebate</caption><thead><tr><th scope="col">Assessment year</th><th scope="col">Chargeable income</th><th scope="col">Annual tax</th><th scope="col">Effective rate</th></tr></thead><tbody id="comparison-rows"></tbody></table></div></details></section>`,
 )
 addNavBarBrand()
 addNavBarEnd()
@@ -113,15 +113,32 @@ function update() {
     el("annual-epf").textContent = rm(result.employeeEpf)
     el("result-status").textContent =
       `${result.proposed ? "Budget proposal estimate" : "Estimate updated"} for YA ${selectedYear}.${input.ignoreReliefs ? " Reliefs and personal rebate excluded." : ""}`
-    const values = [
-      Math.max(0, result.annualTakeHome),
-      result.employeeEpf,
-      result.annualTax,
-      result.socso + result.eis + input.prs,
+    const allocation = [
+      ["net", "Take-home", result.annualTakeHome],
+      ["epf", "Employee EPF", result.employeeEpf],
+      ["tax", "Income tax", result.annualTax],
+      ["other", "SOCSO, EIS and PRS", result.socso + result.eis + input.prs],
     ]
-    const total = values.reduce((a, b) => a + b, 0)
-    ;["net", "epf", "tax", "other"].forEach(
-      (key, i) => (el(`${key}-bar`).style.width = `${total ? (values[i] / total) * 100 : 0}%`),
+    // A gross-income share cannot represent a negative remainder or a zero denominator.
+    const showShares = result.gross > 0 && result.annualTakeHome >= 0
+    el("allocation").hidden = !showShares
+    el("allocation-note").hidden = showShares
+    el("allocation-note").textContent =
+      result.annualTakeHome < 0
+        ? `Annual deductions and payments exceed gross income by ${rm(-result.annualTakeHome)}.`
+        : "There is no gross income to split into shares."
+    for (const [key, label, value] of allocation) {
+      const share = showShares ? value / result.gross : 0
+      el(`${key}-bar`).style.width = `${share * 100}%`
+      const description = `${label}: ${rm(value)} per year${showShares ? ` (${fmt(share * 100)}%)` : ""}`
+      el(`${key}-bar`).title = description
+      el(`${key}-allocation`).textContent = description
+    }
+    el("allocation").setAttribute(
+      "aria-label",
+      `Share of ${rm(result.gross)} annual gross income: ${allocation
+        .map(([, label, value]) => `${label} ${rm(value)}`)
+        .join(", ")}`,
     )
     rows("pay-breakdown", [
       ["Gross annual income", result.gross],
@@ -149,7 +166,7 @@ function update() {
       ["Employer / year", result.employerEpf],
       ["Combined / year", totalEpf, true],
       ["Combined / month, averaged", totalEpf / 12],
-      ["After 30 years at 5%", totalEpf * ((1.05 ** 30 - 1) / 0.05)],
+      ["After 20 years at 5%", totalEpf * ((1.05 ** 20 - 1) / 0.05)],
     ])
     el("bracket-caption").textContent =
       `YA ${selectedYear}${result.proposed ? " proposed" : ""} progressive tax calculation, before rebate`
@@ -179,9 +196,10 @@ function update() {
   } catch (error) {
     el("form-error").textContent = error.message
     el("form-error").hidden = false
-    el("result-status").textContent = "Results have not updated. Check the highlighted inputs."
+    el("result-status").textContent = "Fix the highlighted inputs to update these results."
   }
 }
+// Enter still submits the form; prevent it so a live-updating calculator never navigates away.
 el("tax-form").addEventListener("submit", (event) => {
   event.preventDefault()
   update()
@@ -202,11 +220,9 @@ el("assessmentYear").addEventListener("change", () => {
   update()
 })
 for (const id of ["ignoreReliefs", "social"]) el(id).addEventListener("change", update)
-for (const key of numericKeys)
-  el(key).addEventListener("input", () => {
-    el("result-status").textContent =
-      "Details changed. Calculate again to refresh the results and comparison."
-  })
+for (const key of numericKeys) {
+  for (const event of ["input", "change", "blur"]) el(key).addEventListener(event, update)
+}
 update()
 
 if (typeof ResizeObserver !== "undefined") {

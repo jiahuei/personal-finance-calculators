@@ -15,6 +15,8 @@ The user's job as a senior software engineer is dependent on you implementing cl
 ├── img/               # Project photographs
 ├── tests/             # Node calculation and optional Playwright browser tests
 ├── tasks/             # Plans and dated completion records
+├── .github/workflows/ # Formatting checks on pushes and pull requests
+├── package.json       # Pinned development-only formatting dependency
 ├── .prettierrc.json    # Formatting configuration
 └── README.md          # Local setup, tests and calculation assumptions
 ```
@@ -121,17 +123,17 @@ Before reporting completion, review the final diff and ask:
 ### 8. Linting Workflow
 
 - Run formatting, linting, and static analysis after implementation and before reporting completion.
-- Use `.prettierrc.json` for formatting. This repository currently has no CI lint workflow or package-defined lint commands; inspect any workflow or tooling added later before selecting checks.
+- The `.github/workflows/lint.yml` workflow is the source of truth. Use its Node version and `npm ci` installation before running `npm run format:check`. Prettier is pinned in `package.json` and uses `.prettierrc.json`.
 - Start with changed files for fast feedback, then run the repository-wide formatting check.
 - When editing or creating Markdown files, run the applicable formatting checks.
 
-Always run `npx prettier` commands with escalated permissions on the first attempt. Do not try them in the sandbox first because `npx` requires registry and cache access to resolve Prettier.
+Install dependencies with network and cache access when the sandbox restricts them. Use the installed Prettier through package scripts instead of resolving an unpinned version through `npx`.
 
 From the repository root:
 
-1. Format changed supported files: `npx prettier --write <changed-files>`.
-2. Check changed files: `npx prettier --check <changed-files>`.
-3. Run the repository-wide formatting check: `npx prettier --check .`.
+1. Install the locked development dependencies: `npm ci`.
+2. Format changed supported files with the installed tool: `npm exec -- prettier --write <changed-files>`.
+3. Check changed files with `npm exec -- prettier --check <changed-files>`, then run the repository-wide CI check: `npm run format:check`.
 4. For JavaScript changes, run `node --check <changed-javascript-file>` for each changed file.
 5. Run the applicable calculation or browser tests described above. Documentation-only changes do not require application tests.
 

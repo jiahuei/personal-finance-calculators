@@ -1,6 +1,9 @@
 # Internal references
 __ref__/
 
+# Development dependencies
+node_modules/
+
 # Original full-size images
 /img/ori/
 

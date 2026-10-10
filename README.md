@@ -12,6 +12,17 @@ python3 -m http.server 8000 --bind 127.0.0.1
 
 Open <http://127.0.0.1:8000>. Existing calculator URLs remain available. Selecting another assessment year retains your entered values and updates the URL; reloading starts with the defaults for that year.
 
+## Formatting
+
+The [linting workflow](.github/workflows/lint.yml) checks formatting on pushes and pull requests using Node 24 and the pinned Prettier development dependency. Run the same commands locally:
+
+```sh
+npm ci
+npm run format:check
+```
+
+Use `npm exec -- prettier --write <changed-files>` to format changed files, or `npm run format` to format the whole repository. Prettier follows `.prettierrc.json`; `.prettierignore` excludes nested reference repositories, installed dependencies and generated files. The website still runs without installing development tools.
+
 ## Tests
 
 Calculation and input-validation tests use Node’s built-in test runner (Node 18+):

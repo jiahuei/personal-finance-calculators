@@ -9,6 +9,8 @@
 - Preserved existing calculator routes, added regression tests and run instructions, and removed unused tax, validation and cursor-formatting code.
 - Kept the user-supplied AGENTS.md content unchanged. Its backend, Svelte and Docker guidance does not apply to this static repository.
 
+- Committed the changes on `modernize-finance-calculators` and opened [PR #1](https://github.com/jiahuei/personal-finance-calculators/pull/1).
+
 ## Verification
 
 - `node --test tests/calculators.test.js`: passed 22 tests, including independent bracket totals, marginal-rate transitions, rebate boundaries, relief caps, bonus EPF, historical SOCSO/EIS, numeric parsing and retirement math. The initial sandboxed isolated runner failed because of restricted child processes; the standard command passed with escalated execution. `node --test --test-isolation=none tests/calculators.test.js` and `node tests/calculators.test.js` also passed.

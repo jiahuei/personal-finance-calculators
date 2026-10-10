@@ -8,4 +8,4 @@
 - [x] Read the new repository guidance and inspect applicable formatting configuration.
 - [x] Document each test’s intention, format changed files and rerun affected checks.
 - [x] Complete a final diff review and dated verification record.
-- [ ] Create the requested branch, commit all changes including AGENTS.md, and open a pull request.
+- [x] Create the requested branch, commit all changes including AGENTS.md, and open [PR #1](https://github.com/jiahuei/personal-finance-calculators/pull/1).

@@ -395,6 +395,15 @@ input[aria-invalid="true"] {
   background: var(--teal-dark);
   color: white;
 }
+/* The retirement call to action stays an outline so the tax calculator remains the primary path. */
+.button.secondary {
+  background: var(--white);
+  color: var(--teal-dark);
+}
+.button.secondary:hover {
+  background: var(--mint);
+  color: var(--teal-dark);
+}
 .privacy {
   text-align: center;
   color: var(--muted);
@@ -759,6 +768,11 @@ caption {
 .home-hero h1 em {
   font-style: normal;
   color: var(--teal);
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
 }
 .hero-art {
   background: #e8efe5;

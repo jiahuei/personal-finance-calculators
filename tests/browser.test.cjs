@@ -258,6 +258,23 @@ async function liveRetirementInputs(page) {
         check(response.status() === 200, `${route} should load`)
         check((await page.locator("h1").count()) === 1, `${route} should have one main heading`)
         check((await page.locator(".brand").count()) === 1, `${route} should have one navbar brand`)
+        if (route === "index.html") {
+          // Both calculators are one tap from the hero, and each call to action must resolve.
+          const targets = await page
+            .locator(".hero-actions .button")
+            .evaluateAll((links) => links.map((link) => link.href))
+          check(
+            ["take-home-salary-tax.html", "retirement-monthly-income.html"].every((name) =>
+              targets.some((href) => href.endsWith(`calc/${name}`)),
+            ),
+            `hero offers both calculators: ${targets.join(", ")}`,
+          )
+          for (const href of targets)
+            check(
+              (await page.request.get(href)).status() === 200,
+              `hero call to action resolves: ${href}`,
+            )
+        }
         await noOverflow(page, route, width)
         if (route.startsWith(taxRoute)) {
           check(

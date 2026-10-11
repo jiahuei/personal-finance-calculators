@@ -10,7 +10,7 @@ From this directory:
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Open <http://127.0.0.1:8000>. Existing calculator URLs remain available. Results and the year comparison recalculate as soon as any input changes, so there is no calculate button. Selecting another assessment year retains your entered values and updates the URL; reloading starts with the defaults for that year.
+Open <http://127.0.0.1:8000>. One salary and tax page serves every assessment year: it opens on the newest enacted year, and `calc/take-home-salary-tax.html?ya=2025` opens a specific year. Results and the year comparison recalculate as soon as any input changes, so there is no calculate button. Selecting another assessment year retains your entered values and updates the `?ya=` query; reloading starts with the defaults for that year.
 
 ## Formatting
 
@@ -41,7 +41,7 @@ npm install --prefix /tmp/ringgit-browser-tests playwright@1.58.2
 PLAYWRIGHT_MODULE=/tmp/ringgit-browser-tests/node_modules/playwright node tests/browser.test.cjs
 ```
 
-Run the local server first. If your OS lacks browser libraries, follow Playwright’s platform dependency setup. `TEST_BASE_URL` overrides the server URL; `TEST_SCREENSHOTS` saves screenshots to a chosen directory. The suite checks all 11 routes at 320, 375, 768 and 1440 pixels, including expanded tables, mobile touch/focus, live recalculation for every control, blur-rounding consistency, accessible annual allocation values, zero-income and excess-payment states, the 20-year EPF illustration, the custom select caret, year selection, updated charts, source links, validation, and retirement results. Mobile emulation verifies browser behavior; physical iOS Safari remains a separate device check.
+Run the local server first. If your OS lacks browser libraries, follow Playwright’s platform dependency setup. `TEST_BASE_URL` overrides the server URL; `TEST_SCREENSHOTS` saves screenshots to a chosen directory. The suite checks all 6 routes at 320, 375, 768 and 1440 pixels, including expanded tables, mobile touch/focus, live recalculation for every control, blur-rounding consistency, the monthly and annual breakdown columns, accessible annual allocation values, zero-income and excess-payment states, the 20-year EPF illustration, the custom select caret, year-specific URLs, updated charts, source links, validation, and retirement results. Mobile emulation verifies browser behavior; physical iOS Safari remains a separate device check.
 
 ## Published site and PR previews
 
@@ -74,6 +74,7 @@ Reviewed **10 October 2026**. Source links and assumptions also appear within ea
 - The comparison holds salary, bonus, entered EPF rates, PRS and other reliefs constant; automatic reliefs, contribution ceilings and tax bands follow each year. Users must confirm that their other reliefs qualify in all comparison years.
 - The EPF illustration projects 20 years of unchanged annual contributions deposited at year end at an assumed 5% annual return, which is not guaranteed.
 - The bar under the monthly take-home figure splits gross income into take-home pay, employee EPF, income tax, and SOCSO, EIS and PRS payments. The visible legend gives each colour’s annual amount and share, also available in hover titles. When payments exceed income or gross income is zero, the share bar is hidden and an explanation accompanies the signed annual amounts.
+- The “Where your money goes” breakdown lists each amount per month and per year. Its monthly column divides the annual amount by 12, so it is an average rather than an actual payslip deduction; SOCSO and EIS follow monthly wage bands, and PRS is paid when you choose to pay it.
 
 ## Retirement assumptions
 
@@ -86,6 +87,6 @@ Preserves the original equal annual withdrawal model: savings stay invested, a f
 - `calc/tax-engine.js`: year-specific rules and pure calculations, also importable by Node tests.
 - `calc/tax-app.js`: common tax interface, validation, breakdowns, sources and responsive SVG chart.
 - `calc/retirement-app.js`: retirement interface and validation.
-- Year-specific HTML pages keep stable URLs and load the shared application.
+- `calc/take-home-salary-tax.html`: the single salary and tax page, reading its assessment year from the `?ya=` query.
 
 Licensed under [GPL-3.0](LICENSE). Image attribution is preserved on the photo credits page.

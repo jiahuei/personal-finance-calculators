@@ -7,12 +7,16 @@ const path = require("node:path")
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright")
 const baseURL = process.env.TEST_BASE_URL || "http://127.0.0.1:8000"
 const screenshotDir = process.env.TEST_SCREENSHOTS
-const years = Array.from({ length: 8 }, (_, i) => 2020 + i)
+const taxRoute = "calc/take-home-salary-tax.html"
+// One page serves every assessment year through its ?ya= query, opening on the newest enacted year.
+const defaultYear = TaxEngine.years.filter((year) => !TaxEngine.rules(year).proposed).at(-1)
 const routes = [
   "index.html",
   "photo-credits.html",
   "calc/retirement-monthly-income.html",
-  ...years.map((y) => `calc/take-home-salary-tax-ya${y}.html`),
+  taxRoute,
+  `${taxRoute}?ya=2022`,
+  `${taxRoute}?ya=2027`,
 ]
 const errors = []
 let checks = 0
@@ -23,18 +27,19 @@ const check = (condition, message) => {
 /** Guards against horizontal page overflow at each tested viewport width. */
 async function noOverflow(page, route, width) {
   const dimensions = await page.evaluate(() => ({
-    viewport: innerWidth,
     body: document.body.scrollWidth,
     root: document.documentElement.scrollWidth,
   }))
+  // The requested width is the reference because mobile emulation widens innerWidth to fit
+  // overflowing content, which would hide the overflow this check exists to catch.
   check(
-    Math.max(dimensions.body, dimensions.root) <= dimensions.viewport + 1,
+    Math.max(dimensions.body, dimensions.root) <= width + 1,
     `${route} overflows at ${width}px: ${JSON.stringify(dimensions)}`,
   )
 }
 /** Verifies every tax control updates results without submission or moving the typing focus. */
 async function liveTaxInputs(page, width) {
-  await page.goto(`${baseURL}/calc/take-home-salary-tax-ya2026.html`)
+  await page.goto(`${baseURL}/${taxRoute}`)
   const input = {
     salary: 7500,
     bonus: 0,
@@ -51,7 +56,7 @@ async function liveTaxInputs(page, width) {
       maximumFractionDigits: 2,
     }).format(value)
   /** Asserts the interface reflects the independently unit-tested engine for each changed control. */
-  async function expectedResults(year = 2026) {
+  async function expectedResults(year = defaultYear) {
     const expected = TaxEngine.calculate(input, year)
     check(
       (await page.locator("#annual-tax").textContent()) === `RM ${money(expected.annualTax)}`,
@@ -76,6 +81,28 @@ async function liveTaxInputs(page, width) {
       (await page.locator(".selected-row").textContent()).includes(money(expected.annualTax)),
       "comparison reflects each input immediately",
     )
+    await expectedBreakdown(expected)
+  }
+  /** Asserts the pay breakdown pairs every annual amount with its monthly average. */
+  async function expectedBreakdown(expected) {
+    const rows = await page
+      .locator("#pay-breakdown tr")
+      .evaluateAll((items) => items.map((row) => [...row.cells].map((cell) => cell.textContent)))
+    const wanted = [
+      ["Gross income", expected.gross],
+      ["Employee EPF", expected.employeeEpf],
+      ["SOCSO + EIS", expected.socso + expected.eis],
+      ["Income tax", expected.annualTax],
+      ["PRS / annuity paid", input.prs],
+      ["Take-home", expected.annualTakeHome],
+    ]
+    check(rows.length === wanted.length, "breakdown lists every income allocation")
+    for (const [index, [name, value]] of wanted.entries()) {
+      const [label, monthly, annual] = rows[index]
+      check(label === name, `breakdown keeps the ${name} row`)
+      check(annual === money(value), `${name} row keeps its annual amount`)
+      check(monthly === money(value / 12), `${name} row adds its monthly average`)
+    }
   }
   for (const [id, value] of [
     ["salary", 8123.456],
@@ -231,11 +258,47 @@ async function liveRetirementInputs(page) {
         check(response.status() === 200, `${route} should load`)
         check((await page.locator("h1").count()) === 1, `${route} should have one main heading`)
         check((await page.locator(".brand").count()) === 1, `${route} should have one navbar brand`)
+        if (route === "index.html") {
+          // Both calculators are one tap from the hero, and each call to action must resolve.
+          const targets = await page
+            .locator(".hero-actions .button")
+            .evaluateAll((links) => links.map((link) => link.href))
+          check(
+            ["take-home-salary-tax.html", "retirement-monthly-income.html"].every((name) =>
+              targets.some((href) => href.endsWith(`calc/${name}`)),
+            ),
+            `hero offers both calculators: ${targets.join(", ")}`,
+          )
+          for (const href of targets)
+            check(
+              (await page.request.get(href)).status() === 200,
+              `hero call to action resolves: ${href}`,
+            )
+        }
         await noOverflow(page, route, width)
-        if (route.includes("tax-ya")) {
+        if (route.startsWith(taxRoute)) {
           check(
             (await page.locator("#annual-tax").textContent()) !== "—",
             `${route} should calculate on load`,
+          )
+          const urlYear = Number(new URL(route, baseURL).searchParams.get("ya")) || defaultYear
+          check(
+            (await page.locator("#assessmentYear").inputValue()) === String(urlYear),
+            `${route} opens on the year in its URL`,
+          )
+          check((await page.title()).includes(`YA ${urlYear}`), `${route} titles its own year`)
+          check(
+            (await page.locator("#proposal-notice").isVisible()) ===
+              TaxEngine.rules(urlYear).proposed,
+            "the proposal notice follows the year in the URL",
+          )
+          check(
+            (await page.locator("#pay-breakdown tr").count()) === 6,
+            `${route} breaks down six monthly and annual amounts`,
+          )
+          check(
+            (await page.locator(".breakdown thead").textContent()).includes("Per month"),
+            "the breakdown labels its monthly column",
           )
           check(
             (await page.locator("#comparison-rows tr").count()) === 6,
@@ -300,7 +363,7 @@ async function liveRetirementInputs(page) {
           screenshotDir &&
           [
             "index.html",
-            "calc/take-home-salary-tax-ya2026.html",
+            "calc/take-home-salary-tax.html",
             "calc/retirement-monthly-income.html",
             "photo-credits.html",
           ].includes(route) &&
@@ -316,7 +379,7 @@ async function liveRetirementInputs(page) {
       await liveTaxInputs(page, width)
       await liveRetirementInputs(page)
       if (width < 768) {
-        await page.goto(`${baseURL}/calc/take-home-salary-tax-ya2026.html`)
+        await page.goto(`${baseURL}/${taxRoute}`)
         await page.locator("#navbar-burger").tap()
         check(
           (await page.locator("#navbar-burger").getAttribute("aria-expanded")) === "true",
@@ -373,7 +436,7 @@ async function liveRetirementInputs(page) {
         check((await page.locator("#bonus").inputValue()) === "0.50", "leaving a field formats it")
         const chartBefore = await page.locator("#comparison-rows").textContent()
         await page.locator("#assessmentYear").selectOption("2022")
-        check(page.url().endsWith("take-home-salary-tax-ya2022.html"), "year updates URL")
+        check(page.url().endsWith("take-home-salary-tax.html?ya=2022"), "year updates URL")
         check((await page.locator("#salary").inputValue()) === "8,000.00", "year retains salary")
         check((await page.locator("#bonus").inputValue()) === "0.50", "year retains bonus")
         check(
@@ -385,14 +448,14 @@ async function liveRetirementInputs(page) {
         )
         check(
           (await page.locator(".skip-link").getAttribute("href")).endsWith(
-            "take-home-salary-tax-ya2022.html#main",
+            "take-home-salary-tax.html?ya=2022#main",
           ),
           "skip link follows the selected year",
         )
         await page.locator(".skip-link").focus()
         await page.keyboard.press("Enter")
         check(
-          page.url().endsWith("take-home-salary-tax-ya2022.html#main"),
+          page.url().endsWith("take-home-salary-tax.html?ya=2022#main"),
           "skip link stays in the current document",
         )
         check(
@@ -457,7 +520,7 @@ async function liveRetirementInputs(page) {
     }
     check(errors.length === 0, `No runtime or resource errors: ${errors.join("; ")}`)
     console.log(
-      `Passed ${checks} browser assertions across 11 routes at 320,375,768,1440px, including touch/focus, live recalculation, the allocation legend, validation, year changes, graphs, sources and retirement.`,
+      `Passed ${checks} browser assertions across ${routes.length} routes at 320,375,768,1440px, including touch/focus, live recalculation, the monthly and annual breakdown columns, the allocation legend, validation, year-specific URLs, graphs, sources and retirement.`,
     )
   } finally {
     await browser.close()

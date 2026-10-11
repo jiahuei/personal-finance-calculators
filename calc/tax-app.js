@@ -6,7 +6,12 @@ const fmt = (value) =>
 const rm = (value) => `RM ${fmt(value)}`
 const el = (id) => document.getElementById(id)
 const source = TaxEngine.sources
-let selectedYear = Number(document.body.dataset.year)
+// One page serves every assessment year, so the year comes from the URL; YA 2027 is still a
+// Budget proposal, which is why an absent or unknown ?ya= opens on the newest enacted year.
+const requestedYear = Number(new URLSearchParams(location.search).get("ya"))
+let selectedYear = TaxEngine.years.includes(requestedYear)
+  ? requestedYear
+  : TaxEngine.years.filter((year) => !TaxEngine.rules(year).proposed).at(-1)
 function field(id, label, value, unit, help = "", max = "") {
   const percent = unit === "%" || unit === "months"
   return `<div class="field"><label for="${id}">${label}</label><div class="input-wrap ${percent ? "percent" : ""}">${!percent ? `<span class="prefix" aria-hidden="true">${unit}</span>` : ""}<input id="${id}" name="${id}" type="text" inputmode="decimal" value="${value}" data-max="${max}" required ${help ? `aria-describedby="${id}Help"` : ""}>${percent ? `<span class="suffix" aria-hidden="true">${unit}</span>` : ""}</div>${help ? `<p class="help" id="${id}Help">${help}</p>` : ""}</div>`
@@ -34,7 +39,7 @@ el("main").insertAdjacentHTML(
     <label class="check-row"><input id="ignoreReliefs" type="checkbox"> Compare without tax reliefs or the personal rebate</label>
     <p class="error" id="form-error" role="alert" hidden></p><p class="privacy">Results update as you type and your inputs never leave this browser.</p></form></section>
   <div class="results-column"><section class="result-panel" aria-labelledby="result-title"><p class="eyebrow" id="result-title">02 · Your estimate <span id="result-year"></span></p><p class="result-label">Average monthly take-home</p><div class="amount"><span class="currency">RM</span><span id="monthly-net">—</span></div><p class="result-sub"><span id="annual-net">—</span> per year, including bonus</p><p class="allocation-title">Annual income allocation</p><p class="allocation-note" id="allocation-note" hidden></p><div class="allocation" id="allocation" role="img" aria-label="Share of gross income"><span class="net" id="net-bar"></span><span class="epf" id="epf-bar"></span><span class="tax" id="tax-bar"></span><span class="other" id="other-bar"></span></div><div class="allocation-key"><span class="net" id="net-allocation"></span><span class="epf" id="epf-allocation"></span><span class="tax" id="tax-allocation"></span><span class="other" id="other-allocation"></span></div><div class="result-stats"><div><p>Annual income tax</p><strong id="annual-tax">—</strong></div><div><p>Effective tax rate</p><strong id="effective-rate">—</strong></div><div><p>Employee EPF / year</p><strong id="annual-epf">—</strong></div><div><p>Tax / month, averaged</p><strong id="monthly-tax">—</strong></div></div><p class="result-note" id="result-status" role="status" aria-live="polite">Based on the details entered.</p></section>
-  <section class="panel breakdown"><h3>Where your money goes</h3><div id="pay-breakdown"></div><p class="subtle-note">Monthly figures are annual averages rather than actual PCB deductions or payslip amounts, and PRS payments reduce the cash available to you.</p></section></div></div>
+  <section class="panel breakdown"><h3>Where your money goes</h3><div class="table-scroll"><table><thead><tr><th scope="col"></th><th scope="col">Per month (RM)</th><th scope="col">Per year (RM)</th></tr></thead><tbody id="pay-breakdown"></tbody></table></div><p class="subtle-note">Monthly figures are annual averages rather than actual PCB deductions or payslip amounts, and PRS payments reduce the cash available to you.</p></section></div></div>
   <section class="panel section-block"><details id="calculation-details"><summary>Tax &amp; EPF breakdown</summary><div class="source-grid"><div><h3>From income to tax</h3><div id="tax-breakdown"></div></div><div><h3>Your EPF savings</h3><div id="epf-breakdown"></div><p class="subtle-note">The 20-year illustration assumes unchanged annual contributions deposited at year end and 5% annual returns, which are not guaranteed.</p></div></div><div class="table-scroll section-block"><table><caption id="bracket-caption"></caption><thead><tr><th scope="col">Chargeable income band (RM)</th><th scope="col">Rate</th><th scope="col">Tax in band (RM)</th></tr></thead><tbody id="bracket-rows"></tbody></table></div></details></section>
   <section class="panel section-block" aria-labelledby="sources-title"><details><summary id="sources-title">Sources &amp; calculation assumptions</summary><div class="source-grid"><div><a href="${source.rates}">HASiL · YA 2020–2025 tax rates ↗</a><p>Progressive resident individual tax schedules, including the change from YA 2023.</p><a href="${source.mtd2026}">HASiL · 2026 calculation specification ↗</a><p>YA 2026 uses the continuing resident bands in the 2026 MTD specification.</p></div><div><a href="${source.budget2027}">Prime Minister’s Office · Budget 2027 ↗</a><p>Speech of 9 October 2026, paragraphs 29–30. YA 2027 estimates apply the announced changes, with unmentioned bands and relief caps carried forward. The schedule is a Budget proposal and has not been enacted.</p></div><div><a href="${source.reliefs}">HASiL · reliefs by assessment year ↗</a><p>Automatically includes personal relief, employee EPF up to RM 4,000, PRS up to RM 3,000 and SOCSO/EIS contributions up to RM 350 from YA 2022, or SOCSO alone up to RM 250 in YA 2020–2021. Other reliefs must be entered within the applicable annual limits.</p><a href="${source.socialRelief2022}">Ministry of Finance · 2022 SOCSO/EIS relief change ↗</a><a href="${source.prs}">Ministry of Finance · PRS extension ↗</a><p>Budget 2025 tax measures, Appendix 4: extension through YA 2030.</p></div><div><a href="${source.rebate}">MIDA · resident individual tax rebate ↗</a><p>RM 400 personal rebate for chargeable income up to RM 35,000, capped at tax charged. Joint assessment, spouse rebates, zakat and special tax regimes are not modelled.</p></div><div><a href="${source.socso}">PERKESO · contribution schedules ↗</a><p>Standard employee SOCSO and EIS bands. Annual estimates account for the September 2022 and October 2024 wage-ceiling changes. Excludes optional LINDUNG 24 Jam contributions.</p><a href="${source.socso2022}">PERKESO · September 2022 circular ↗</a></div><div><a href="${source.epf}">KWSP · mandatory contributions ↗</a><p>EPF is a percentage estimate on salary and bonus, using your entered rates. Actual contributions follow KWSP’s statutory schedule and rounding. Employer contributions do not reduce take-home pay.</p></div></div><p class="subtle-note">Reviewed 10 October 2026. Assumes a full year of constant employment income for a Malaysian resident individual under 60. You supply the eligible amount for other reliefs, so confirm that each one applies to you. Estimates are for planning and are not tax advice.</p></details></section>
   <section class="panel chart-panel" aria-labelledby="comparison-title"><div class="panel-heading"><h2 id="comparison-title">The same income in other years</h2><span class="badge">YA 2022–2027</span></div><p class="intro" id="comparison-description"></p><div class="chart-key"><span>Published rules</span><span class="proposal">2027 budget proposal</span></div><div id="tax-chart"></div><p class="chart-summary" id="comparison-summary"></p><p class="subtle-note">Salary, bonus, EPF rates, PRS payments and other entered reliefs stay constant. Automatic reliefs and tax bands follow each YA. Check that your other reliefs qualify in every year. Dashed segment: proposed YA 2027 rules.</p><details class="chart-table" open><summary>View exact yearly amounts</summary><div class="table-scroll"><table><caption>Same-income comparison, after eligible personal rebate</caption><thead><tr><th scope="col">Assessment year</th><th scope="col">Chargeable income</th><th scope="col">Annual tax</th><th scope="col">Effective rate</th></tr></thead><tbody id="comparison-rows"></tbody></table></div></details></section>`,
@@ -76,6 +81,14 @@ function rows(target, values) {
     .map(
       ([name, value, total]) =>
         `<div class="data-row ${total ? "total" : ""}"><span>${name}</span><strong>${rm(value)}</strong></div>`,
+    )
+    .join("")
+}
+function monthlyRows(values) {
+  el("pay-breakdown").innerHTML = values
+    .map(
+      ([name, value, total]) =>
+        `<tr${total ? ' class="total"' : ""}><th scope="row">${name}</th><td>${fmt(value / 12)}</td><td>${fmt(value)}</td></tr>`,
     )
     .join("")
 }
@@ -140,13 +153,13 @@ function update() {
         .map(([, label, value]) => `${label} ${rm(value)}`)
         .join(", ")}`,
     )
-    rows("pay-breakdown", [
-      ["Gross annual income", result.gross],
+    monthlyRows([
+      ["Gross income", result.gross],
       ["Employee EPF", result.employeeEpf],
       ["SOCSO + EIS", result.socso + result.eis],
       ["Income tax", result.annualTax],
       ["PRS / annuity paid", input.prs],
-      ["Annual take-home", result.annualTakeHome, true],
+      ["Take-home", result.annualTakeHome, true],
     ])
     rows("tax-breakdown", [
       ["Gross annual income", result.gross],
@@ -204,25 +217,30 @@ el("tax-form").addEventListener("submit", (event) => {
   event.preventDefault()
   update()
 })
-el("assessmentYear").addEventListener("change", () => {
-  selectedYear = Number(el("assessmentYear").value)
-  document.body.dataset.year = selectedYear
+// The year lives in the URL, so the page title, proposal notice and skip link follow the selection.
+function applyYearToPage() {
   el("proposal-notice").hidden = selectedYear !== 2027
   document.title = `YA ${selectedYear} Salary & Tax Calculator — Ringgit / tools`
+  // The base URL makes hash-only links resolve to the home page, so the skip link repeats the
+  // current path and year query to stay an in-document jump.
+  document.querySelector(".skip-link").href = `${location.pathname}${location.search}#main`
+}
+el("assessmentYear").addEventListener("change", () => {
+  selectedYear = Number(el("assessmentYear").value)
   // Keep entered details when changing year, while preserving shareable year-specific URLs.
   history.replaceState(
     null,
     "",
-    new URL(`calc/take-home-salary-tax-ya${selectedYear}.html`, document.baseURI),
+    new URL(`calc/take-home-salary-tax.html?ya=${selectedYear}`, document.baseURI),
   )
-  // The base URL makes hash-only links resolve to the home page.
-  document.querySelector(".skip-link").href = `${location.pathname}#main`
+  applyYearToPage()
   update()
 })
 for (const id of ["ignoreReliefs", "social"]) el(id).addEventListener("change", update)
 for (const key of numericKeys) {
   for (const event of ["input", "change", "blur"]) el(key).addEventListener(event, update)
 }
+applyYearToPage()
 update()
 
 if (typeof ResizeObserver !== "undefined") {

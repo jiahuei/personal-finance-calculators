@@ -542,6 +542,27 @@ input[aria-invalid="true"] {
   margin-top: 4px;
   color: var(--teal);
 }
+/* A table keeps the monthly and annual columns of the pay breakdown aligned, while these
+   overrides keep the muted-label/bold-amount look of the data rows beside it. */
+.breakdown table {
+  font-size: 0.82rem;
+}
+.breakdown th,
+.breakdown td {
+  padding: 10px 0 10px 12px;
+  background: none;
+}
+.breakdown th {
+  padding-left: 0;
+}
+.breakdown td {
+  font-weight: 650;
+}
+.breakdown tr.total th,
+.breakdown tr.total td {
+  border-bottom: 0;
+  color: var(--teal);
+}
 .notice {
   padding: 16px 18px;
   border-radius: 10px;
@@ -896,7 +917,8 @@ caption {
     padding: 8px;
   }
   .workspace {
-    grid-template-columns: 1fr;
+    /* A plain 1fr track cannot shrink below its content, so wide results used to widen the page. */
+    grid-template-columns: minmax(0, 1fr);
   }
   .home-hero {
     gap: 30px;

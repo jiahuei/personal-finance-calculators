@@ -18,10 +18,8 @@ for (const id of retirementFields) {
         : floatToEnString(parsed)
       : value
   })
-  retirementEl(id).addEventListener("input", () => {
-    retirementEl("resultsStatus").textContent =
-      "Details changed. Calculate again to refresh your estimate."
-  })
+  for (const event of ["input", "change", "blur"])
+    retirementEl(id).addEventListener(event, updateRetirement)
 }
 function updateRetirement() {
   try {
@@ -55,9 +53,10 @@ function updateRetirement() {
     retirementEl("form-error").textContent = error.message
     retirementEl("form-error").hidden = false
     retirementEl("resultsStatus").textContent =
-      "Results have not updated. Check the highlighted inputs."
+      "Fix the highlighted inputs to update this estimate."
   }
 }
+// Enter still submits the form; prevent it so a live-updating calculator never navigates away.
 retirementEl("retirement-form").addEventListener("submit", (event) => {
   event.preventDefault()
   updateRetirement()

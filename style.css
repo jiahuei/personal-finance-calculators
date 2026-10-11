@@ -298,7 +298,7 @@ select {
   width: 100%;
   min-height: 48px;
   padding: 11px 14px;
-  background: #fbfcfa;
+  background-color: #fbfcfa;
   color: var(--ink);
   border: 1px solid #cad8ce;
   border-radius: 9px;
@@ -307,6 +307,16 @@ select {
   transition:
     border-color 0.15s,
     box-shadow 0.15s;
+}
+/* Draw a consistent caret on the same 14px inset as the other controls. */
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 42px;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1.4 1.6 6 6.2l4.6-4.6' fill='none' stroke='%23647673' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-position: right 14px center;
+  background-repeat: no-repeat;
+  background-size: 12px 8px;
 }
 .input-wrap input {
   padding-left: 46px;
@@ -385,14 +395,6 @@ input[aria-invalid="true"] {
   background: var(--teal-dark);
   color: white;
 }
-.button.wide {
-  width: 100%;
-}
-.button.secondary {
-  background: white;
-  color: var(--teal);
-  border-color: var(--line);
-}
 .privacy {
   text-align: center;
   color: var(--muted);
@@ -439,27 +441,57 @@ input[aria-invalid="true"] {
   color: #bfd7cd;
   margin-bottom: 26px;
 }
+.allocation-title {
+  font-size: 0.72rem;
+  color: #bfd7cd;
+  margin: 0;
+}
+.allocation-note {
+  font-size: 0.8rem;
+  color: #bfd7cd;
+  margin: 10px 0 12px;
+}
 .allocation {
   height: 7px;
   border-radius: 4px;
   display: flex;
   overflow: hidden;
   background: #ffffff22;
-  margin: 24px 0;
+  margin: 10px 0 12px;
 }
 .allocation span {
   min-width: 0;
 }
-.allocation .net {
+.allocation-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 0.72rem;
+  color: #bfd7cd;
+  margin: 12px 0 24px;
+}
+.allocation-key span:before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 7px;
+}
+.allocation .net,
+.allocation-key .net:before {
   background: #a3d5b5;
 }
-.allocation .epf {
+.allocation .epf,
+.allocation-key .epf:before {
   background: #d7df9b;
 }
-.allocation .tax {
+.allocation .tax,
+.allocation-key .tax:before {
   background: #e5a573;
 }
-.allocation .other {
+.allocation .other,
+.allocation-key .other:before {
   background: #7b9d9b;
 }
 .result-stats {

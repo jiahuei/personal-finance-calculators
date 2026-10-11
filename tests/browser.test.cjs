@@ -1,6 +1,7 @@
 "use strict"
 // Optional browser integration suite. Runtime site requires no Node dependencies.
 const assert = require("node:assert/strict")
+const TaxEngine = require("../calc/tax-engine.js")
 const fs = require("node:fs")
 const path = require("node:path")
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright")
@@ -31,7 +32,184 @@ async function noOverflow(page, route, width) {
     `${route} overflows at ${width}px: ${JSON.stringify(dimensions)}`,
   )
 }
-/** Ensures all routes, touch focus, year switching, charts and retirement work in a real browser. */
+/** Verifies every tax control updates results without submission or moving the typing focus. */
+async function liveTaxInputs(page, width) {
+  await page.goto(`${baseURL}/calc/take-home-salary-tax-ya2026.html`)
+  const input = {
+    salary: 7500,
+    bonus: 0,
+    employeeRate: 11,
+    employerRate: 12,
+    prs: 0,
+    otherReliefs: 0,
+    social: true,
+    ignoreReliefs: false,
+  }
+  const money = (value) =>
+    new Intl.NumberFormat("en-MY", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value)
+  /** Asserts the interface reflects the independently unit-tested engine for each changed control. */
+  async function expectedResults(year = 2026) {
+    const expected = TaxEngine.calculate(input, year)
+    check(
+      (await page.locator("#annual-tax").textContent()) === `RM ${money(expected.annualTax)}`,
+      "annual tax reflects current controls",
+    )
+    check(
+      (await page.locator("#monthly-net").textContent()) === money(expected.monthlyTakeHome),
+      "take-home reflects current controls",
+    )
+    const epf = expected.employeeEpf + expected.employerEpf
+    const projection = Array.from({ length: 20 }, (_, i) => epf * 1.05 ** i).reduce(
+      (sum, value) => sum + value,
+      0,
+    )
+    check(
+      (await page.locator("#epf-breakdown").textContent()).includes(
+        `After 20 years at 5%RM ${money(projection)}`,
+      ),
+      "EPF illustration uses 20 year-end contributions, including the employer rate",
+    )
+    check(
+      (await page.locator(".selected-row").textContent()).includes(money(expected.annualTax)),
+      "comparison reflects each input immediately",
+    )
+  }
+  for (const [id, value] of [
+    ["salary", 8123.456],
+    ["bonus", 1],
+    ["employeeRate", 9],
+    ["employerRate", 13],
+    ["prs", 2000],
+    ["otherReliefs", 1500],
+  ]) {
+    await page.locator(`#${id}`).fill(String(value))
+    input[id] = value
+    await expectedResults()
+    check(
+      await page.evaluate((id) => document.activeElement.id === id, id),
+      `${id} retains focus during live recalculation`,
+    )
+    await page.locator(`#${id}`).blur()
+    input[id] = Number(value.toFixed(2))
+    await expectedResults()
+  }
+  for (const [id, value] of [
+    ["social", false],
+    ["ignoreReliefs", true],
+  ]) {
+    await page.locator(`#${id}`).setChecked(value)
+    input[id] = value
+    await expectedResults()
+  }
+  await page.locator("#assessmentYear").selectOption("2022")
+  await expectedResults(2022)
+  const validTax = await page.locator("#annual-tax").textContent()
+  for (const invalid of ["", "1,2"]) {
+    await page.locator("#salary").fill(invalid)
+    check(
+      await page.locator("#form-error").isVisible(),
+      "empty or malformed input explains the validation failure",
+    )
+    check(
+      (await page.locator("#annual-tax").textContent()) === validTax,
+      "invalid input preserves the last valid result",
+    )
+  }
+  await page.locator("#salary").fill("9000")
+  await page.locator("#salary").evaluate((field) => {
+    field.value = "10000"
+    field.dispatchEvent(new Event("change", { bubbles: true }))
+  })
+  input.salary = 10000
+  await expectedResults(2022)
+  check(
+    !(await page.locator("#form-error").isVisible()),
+    "valid input restores results after validation",
+  )
+  await page.locator("#prs").fill("200000")
+  check(
+    !(await page.locator("#allocation").isVisible()),
+    "deductions above income do not masquerade as gross shares",
+  )
+  check(
+    (await page.locator("#allocation-note").textContent()).includes("exceed gross income"),
+    "negative take-home explains the excess payments",
+  )
+  check(
+    (await page.locator("#net-allocation").textContent()).includes("RM -"),
+    "legend preserves negative annual take-home",
+  )
+  check(
+    !(await page.locator("#net-allocation").textContent()).includes("%"),
+    "overspending legend does not show gross shares",
+  )
+  await noOverflow(page, "negative take-home legend", width)
+  await page.locator("#salary").fill("0")
+  await page.locator("#prs").fill("0")
+  check(!(await page.locator("#allocation").isVisible()), "zero gross income has no share bar")
+  check(
+    (await page.locator("#allocation-note").textContent()).includes("no gross income"),
+    "zero denominator is explained",
+  )
+  check(
+    (await page.locator("#net-allocation").textContent()).includes("RM 0.00 per year"),
+    "zero-income legend still provides accessible annual values",
+  )
+}
+/** Verifies all retirement inputs recalculate live, preserve focus and recover from invalid input. */
+async function liveRetirementInputs(page) {
+  await page.goto(`${baseURL}/calc/retirement-monthly-income.html`)
+  for (const [id, value] of [
+    ["retireAgeInput", 60],
+    ["lifeExpectancyInput", 85],
+    ["retireSavingInput", 1200000],
+    ["dividendRatePercentInput", 0],
+  ]) {
+    const before = await page.locator("#monthlyWithdrawResult").textContent()
+    await page.locator(`#${id}`).fill(String(value))
+    check(
+      (await page.locator("#monthlyWithdrawResult").textContent()) !== before,
+      `${id} changes the retirement result without submitting`,
+    )
+    check(
+      await page.evaluate((id) => document.activeElement.id === id, id),
+      `${id} retains typing focus`,
+    )
+  }
+  check(
+    (await page.locator("#monthlyWithdrawResult").textContent()) === "4,000.00",
+    "zero-return result matches savings divided across 25 years",
+  )
+  const lastValid = await page.locator("#monthlyWithdrawResult").textContent()
+  await page.locator("#retireSavingInput").fill("")
+  check(await page.locator("#form-error").isVisible(), "empty retirement savings reports an error")
+  check(
+    (await page.locator("#monthlyWithdrawResult").textContent()) === lastValid,
+    "invalid savings preserves the last valid result",
+  )
+  await page.locator("#retireSavingInput").fill("1234567.891")
+  await page.locator("#retireSavingInput").blur()
+  check(
+    (await page.locator("#retireSavingInput").inputValue()) === "1,234,567.89",
+    "savings formats on blur",
+  )
+  check(
+    (await page.locator("#monthlyWithdrawResult").textContent()) === "4,115.23",
+    "retirement result matches the formatted savings",
+  )
+  await page.locator("#retireSavingInput").evaluate((field) => {
+    field.value = "1200000"
+    field.dispatchEvent(new Event("change", { bubbles: true }))
+  })
+  check(
+    (await page.locator("#monthlyWithdrawResult").textContent()) === "4,000.00",
+    "change event updates retirement results",
+  )
+}
+/** Ensures all routes recalculate live, explain the allocation bar and keep touch focus in a real browser. */
 ;(async () => {
   const browser = await chromium.launch({ headless: true })
   try {
@@ -77,6 +255,46 @@ async function noOverflow(page, route, width) {
             .evaluate((svg) => svg.viewBox.baseVal.width)
           const chartWidth = await page.locator("#tax-chart").evaluate((node) => node.clientWidth)
           check(Math.abs(widthInSvg - chartWidth) < 2, "chart labels use available pixel width")
+          // The legend and hover titles answer what each coloured segment represents.
+          check(
+            (await page.locator(".allocation-key span").count()) === 4,
+            "allocation legend names every segment",
+          )
+          const shares = await page
+            .locator(".allocation span")
+            .evaluateAll((spans) => spans.map((span) => Number.parseFloat(span.style.width) || 0))
+          check(
+            Math.abs(shares.reduce((sum, share) => sum + share, 0) - 100) < 0.01,
+            "allocation segments fill the whole gross income bar",
+          )
+          check(
+            (await page.locator("#tax-bar").getAttribute("title")).startsWith("Income tax: RM "),
+            "hovering a segment reveals its amount and share",
+          )
+          check(
+            (await page.locator("#tax-allocation").textContent()).includes("per year ("),
+            "visible annual amounts and shares are available to touch and keyboard users",
+          )
+          check(
+            (await page.locator("#allocation").getAttribute("aria-label")).includes("gross income"),
+            "allocation bar is described to assistive technology",
+          )
+          const caret = await page.locator("#assessmentYear").evaluate((select) => {
+            const style = getComputedStyle(select)
+            return {
+              appearance: style.appearance,
+              image: style.backgroundImage,
+              paddingRight: style.paddingRight,
+              position: style.backgroundPosition,
+            }
+          })
+          check(
+            caret.appearance === "none" &&
+              caret.image.startsWith("url(") &&
+              caret.paddingRight === "42px" &&
+              caret.position.includes("14px"),
+            `year dropdown draws its own caret on the field inset: ${JSON.stringify(caret)}`,
+          )
         }
         if (
           screenshotDir &&
@@ -95,6 +313,8 @@ async function noOverflow(page, route, width) {
           })
         }
       }
+      await liveTaxInputs(page, width)
+      await liveRetirementInputs(page)
       if (width < 768) {
         await page.goto(`${baseURL}/calc/take-home-salary-tax-ya2026.html`)
         await page.locator("#navbar-burger").tap()
@@ -133,21 +353,24 @@ async function noOverflow(page, route, width) {
           "blur must never restore selection",
         )
         await page.locator("#salary").fill("1,2")
+        check(
+          await page.locator("#form-error").isVisible(),
+          "malformed input shows validation while typing",
+        )
         await page.locator("#bonus").tap()
         check(
           (await page.locator("#salary").inputValue()) === "1,2",
           "malformed comma input stays visible",
         )
-        await page.locator("#tax-form button").tap()
-        check(await page.locator("#form-error").isVisible(), "malformed input shows validation")
         check(
           (await page.locator("#salary").getAttribute("aria-invalid")) === "true",
           "invalid input accessible state",
         )
         await page.locator("#salary").fill("8000")
         await page.locator("#bonus").fill(".5")
-        await page.locator("#tax-form button").tap()
         check(!(await page.locator("#form-error").isVisible()), "decimal input succeeds")
+        await page.locator("#bonus").blur()
+        check((await page.locator("#bonus").inputValue()) === "0.50", "leaving a field formats it")
         const chartBefore = await page.locator("#comparison-rows").textContent()
         await page.locator("#assessmentYear").selectOption("2022")
         check(page.url().endsWith("take-home-salary-tax-ya2022.html"), "year updates URL")
@@ -180,10 +403,9 @@ async function noOverflow(page, route, width) {
         check(await page.locator("#proposal-notice").isVisible(), "2027 proposal notice is visible")
         check((await page.title()).includes("2027"), "year updates title")
         await page.locator("#salary").fill("9000")
-        await page.locator("#tax-form button").tap()
         check(
           (await page.locator("#comparison-rows").textContent()) !== chartBefore,
-          "comparison updates after new income",
+          "comparison updates after new income without submitting",
         )
         const sources = await page
           .locator(".source-grid a")
@@ -201,11 +423,9 @@ async function noOverflow(page, route, width) {
           "2027 proposal source linked",
         )
         await page.locator("#employeeRate").fill("101")
-        await page.locator("#tax-form button").tap()
         check(await page.locator("#form-error").isVisible(), "EPF rate over100 rejected")
         await page.locator("#employeeRate").fill("11")
         await page.locator("#salary").fill("0")
-        await page.locator("#tax-form button").tap()
         check(
           (await page.locator("#annual-tax").textContent()) === "RM 0.00",
           "zero income gives zero tax",
@@ -215,18 +435,19 @@ async function noOverflow(page, route, width) {
           "zero income gives zero take-home",
         )
         await page.goto(`${baseURL}/calc/retirement-monthly-income.html`)
+        check(
+          (await page.locator("#retirement-form button").count()) === 0,
+          "retirement form needs no manual calculate button",
+        )
         await page.locator("#dividendRatePercentInput").fill("0")
-        await page.locator("#retirement-form button").tap()
         check(
           (await page.locator("#monthlyWithdrawResult").textContent()) === "3,333.33",
           "zero-return retirement result",
         )
         await page.locator("#lifeExpectancyInput").fill("55")
-        await page.locator("#retirement-form button").tap()
         check(await page.locator("#form-error").isVisible(), "retirement end age must exceed start")
         await page.locator("#lifeExpectancyInput").fill("80")
         await page.locator("#retireSavingInput").fill("0")
-        await page.locator("#retirement-form button").tap()
         check(
           (await page.locator("#monthlyWithdrawResult").textContent()) === "0.00",
           "zero savings result",
@@ -236,7 +457,7 @@ async function noOverflow(page, route, width) {
     }
     check(errors.length === 0, `No runtime or resource errors: ${errors.join("; ")}`)
     console.log(
-      `Passed ${checks} browser assertions across 11 routes at 320,375,768,1440px, including touch/focus, validation, year changes, graphs, sources and retirement.`,
+      `Passed ${checks} browser assertions across 11 routes at 320,375,768,1440px, including touch/focus, live recalculation, the allocation legend, validation, year changes, graphs, sources and retirement.`,
     )
   } finally {
     await browser.close()

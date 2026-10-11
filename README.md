@@ -10,7 +10,7 @@ From this directory:
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Open <http://127.0.0.1:8000>. Existing calculator URLs remain available. Selecting another assessment year retains your entered values and updates the URL; reloading starts with the defaults for that year.
+Open <http://127.0.0.1:8000>. Existing calculator URLs remain available. Results and the year comparison recalculate as soon as any input changes, so there is no calculate button. Selecting another assessment year retains your entered values and updates the URL; reloading starts with the defaults for that year.
 
 ## Formatting
 
@@ -41,7 +41,7 @@ npm install --prefix /tmp/ringgit-browser-tests playwright@1.58.2
 PLAYWRIGHT_MODULE=/tmp/ringgit-browser-tests/node_modules/playwright node tests/browser.test.cjs
 ```
 
-Run the local server first. If your OS lacks browser libraries, follow Playwright’s platform dependency setup. `TEST_BASE_URL` overrides the server URL; `TEST_SCREENSHOTS` saves screenshots to a chosen directory. The suite checks all 11 routes at 320, 375, 768 and 1440 pixels, including expanded tables, mobile touch/focus, year selection, updated charts, source links, validation, and retirement results. Mobile emulation verifies browser behavior; physical iOS Safari remains a separate device check.
+Run the local server first. If your OS lacks browser libraries, follow Playwright’s platform dependency setup. `TEST_BASE_URL` overrides the server URL; `TEST_SCREENSHOTS` saves screenshots to a chosen directory. The suite checks all 11 routes at 320, 375, 768 and 1440 pixels, including expanded tables, mobile touch/focus, live recalculation for every control, blur-rounding consistency, accessible annual allocation values, zero-income and excess-payment states, the 20-year EPF illustration, the custom select caret, year selection, updated charts, source links, validation, and retirement results. Mobile emulation verifies browser behavior; physical iOS Safari remains a separate device check.
 
 ## Published site and PR previews
 
@@ -68,10 +68,12 @@ Reviewed **10 October 2026**. Source links and assumptions also appear within ea
 - The model assumes a Malaysian resident employee under 60 earning a constant monthly salary for 12 months, plus a bonus expressed in salary months. It does not model non-resident rates, joint assessment, spouse rebates, zakat, or special tax regimes.
 - Automatic reliefs include personal relief (RM 9,000 through YA 2026), employee EPF capped at RM 4,000, and PRS/deferred annuity capped at RM 3,000. Other reliefs are a user-supplied eligible annual total; check the selected year’s limits in the [HASiL relief guide](https://www.hasil.gov.my/en/individu/pelepasan-cukai/). The [Budget 2025 tax measures](https://belanjawan.mof.gov.my/pdf/belanjawan2025/ucapan/tax-measure.pdf), Appendix 4, extend PRS relief through YA 2030.
 - SOCSO relief is capped at RM 250 in YA 2020–2021 and excludes EIS. From YA 2022, the combined SOCSO/EIS cap is RM 350; see the [Budget 2022 tax measures](https://belanjawan.mof.gov.my/pdf/2022/ucapan/bs22.pdf). Employee contributions follow the standard [PERKESO bands](https://www.perkeso.gov.my/en/rate-of-contribution.html). The wage ceiling is RM 4,000 until August 2022, RM 5,000 from September 2022, and RM 6,000 from October 2024. Optional LINDUNG 24 Jam contributions are excluded.
-- EPF is a percentage estimate on salary and bonus. Users enter their actual average annual employee/employer rates, including historical changes. Actual payroll uses [KWSP’s contribution schedule](https://www.kwsp.gov.my/en/employer/responsibilities/mandatory-contribution) and rounding. Employer EPF adds to savings, not cash deductions.
+- EPF is a percentage estimate on salary and bonus. Users enter their actual average annual employee/employer rates, including historical changes. Actual payroll uses [KWSP’s contribution schedule](https://www.kwsp.gov.my/en/employer/responsibilities/mandatory-contribution) and rounding. Employer EPF increases your savings and leaves cash deductions unchanged.
 - The RM 400 personal rebate applies when chargeable income is at most RM 35,000 and is capped at tax charged; see [MIDA’s policy booklet](https://www.mida.gov.my/wp-content/uploads/2021/04/BOOKLET-1-GENERAL-POLICIES-FACILITIES-AND-GUIDELINES.pdf). “Without tax reliefs” also excludes this rebate.
 - PRS cash payments are deducted in full from take-home cash even when the relief is capped or switched off. Monthly outputs are annual averages, including bonus, rather than actual PCB or payslip amounts.
 - The comparison holds salary, bonus, entered EPF rates, PRS and other reliefs constant; automatic reliefs, contribution ceilings and tax bands follow each year. Users must confirm that their other reliefs qualify in all comparison years.
+- The EPF illustration projects 20 years of unchanged annual contributions deposited at year end at an assumed 5% annual return, which is not guaranteed.
+- The bar under the monthly take-home figure splits gross income into take-home pay, employee EPF, income tax, and SOCSO, EIS and PRS payments. The visible legend gives each colour’s annual amount and share, also available in hover titles. When payments exceed income or gross income is zero, the share bar is hidden and an explanation accompanies the signed annual amounts.
 
 ## Retirement assumptions
 

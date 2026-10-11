@@ -78,7 +78,7 @@ function addNavBarEnd() {
 }
 function addFooter() {
   document.getElementById("footer").innerHTML =
-    `<div class="footer-inner"><div><strong>Ringgit / tools</strong><p>A little clarity for your financial decisions.</p></div><p>Made by <a href="https://github.com/jiahuei">Jia-Huei Tan</a> · <a href="https://choosealicense.com/licenses/gpl-3.0/">GPL-3.0</a><br><a href="photo-credits.html">Photo credits</a> · <a href="https://icons8.com/icon/85951/calculator">Favicon by Icons8</a></p></div>`
+    `<div class="footer-inner"><div><strong>Ringgit / tools</strong><p>Income tax, take-home pay and retirement calculators for Malaysia.</p></div><p>Made by <a href="https://github.com/jiahuei">Jia-Huei Tan</a> · <a href="https://choosealicense.com/licenses/gpl-3.0/">GPL-3.0</a><br><a href="photo-credits.html">Photo credits</a> · <a href="https://icons8.com/icon/85951/calculator">Favicon by Icons8</a></p></div>`
 }
 
 if (typeof module !== "undefined" && module.exports) {

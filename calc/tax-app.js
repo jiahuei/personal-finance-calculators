@@ -78,6 +78,10 @@ for (const key of numericKeys) {
 }
 const salaryInput = el("salary")
 const salarySlider = el("salarySlider")
+function updateSalarySliderAccessibility(value) {
+  salarySlider.setAttribute("aria-valuenow", String(Math.round(value)))
+  salarySlider.setAttribute("aria-valuetext", scaleLabel(value))
+}
 // The typed amount stays authoritative, so only the text field syncs the slider. Syncing inside
 // update() would fight a drag, because rounding the dragged amount can move the position a step.
 function syncSalarySlider() {
@@ -85,13 +89,14 @@ function syncSalarySlider() {
   if (!Number.isFinite(parsed)) return
   const clamped = Math.min(salaryRange.max, Math.max(salaryRange.min, parsed))
   salarySlider.value = String(salaryPosition(clamped))
-  salarySlider.setAttribute("aria-valuenow", String(Math.round(clamped)))
-  salarySlider.setAttribute("aria-valuetext", scaleLabel(clamped))
+  updateSalarySliderAccessibility(clamped)
 }
 for (const event of ["input", "change", "blur"])
   salaryInput.addEventListener(event, syncSalarySlider)
 salarySlider.addEventListener("input", () => {
-  salaryInput.value = fmt(roundSalary(sliderSalary(Number(salarySlider.value))))
+  const salary = roundSalary(sliderSalary(Number(salarySlider.value)))
+  salaryInput.value = fmt(salary)
+  updateSalarySliderAccessibility(salary)
   update()
 })
 function readInput() {

@@ -236,7 +236,7 @@ async function liveRetirementInputs(page) {
     "change event updates retirement results",
   )
 }
-/** Verifies the salary slider spans RM 1,000 to RM 3,000,000 logarithmically, drives the field and follows typed amounts. */
+/** Verifies the salary slider drives the field, follows typed amounts and keeps accessible values current after mouse and keyboard input. */
 async function salarySlider(page, width) {
   await page.goto(`${baseURL}/${taxRoute}`)
   const slider = page.locator("#salarySlider")
@@ -297,8 +297,29 @@ async function salarySlider(page, width) {
   await page.mouse.down()
   await page.mouse.move(box.x + box.width * 0.62, box.y + box.height / 2, { steps: 5 })
   await page.mouse.up()
-  check((await state()).amount !== beforeDrag, "dragging the slider changes the monthly salary")
+  const dragged = await state()
+  check(dragged.amount !== beforeDrag, "dragging the slider changes the monthly salary")
+  check(
+    dragged.amount === money(Number(dragged.now)) &&
+      dragged.text === `RM ${new Intl.NumberFormat("en-MY").format(Number(dragged.now))}`,
+    "dragging updates both accessible salary values to match the field",
+  )
   check((await page.locator("#annual-tax").textContent()) !== "—", "dragging recalculates")
+  await slider.focus()
+  for (const [key, expected] of [
+    ["End", 3000000],
+    ["Home", 1000],
+    ["ArrowRight", spendable(positionSalary(1))],
+  ]) {
+    await page.keyboard.press(key)
+    const keyed = await state()
+    check(
+      keyed.amount === money(expected) &&
+        keyed.now === String(expected) &&
+        keyed.text === `RM ${new Intl.NumberFormat("en-MY").format(expected)}`,
+      `${key} updates the salary and both accessible values`,
+    )
+  }
   for (const [position, expected] of [
     [0, 1000],
     [steps, 3000000],
@@ -310,7 +331,10 @@ async function salarySlider(page, width) {
     }, position)
     const moved = await state()
     check(
-      moved.amount === money(expected),
+      Number(moved.position) === position &&
+        moved.amount === money(expected) &&
+        moved.now === String(expected) &&
+        moved.text === `RM ${new Intl.NumberFormat("en-MY").format(expected)}`,
       `${width}: position ${position} enters ${money(expected)}, got ${moved.amount}`,
     )
   }

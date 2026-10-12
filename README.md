@@ -10,7 +10,7 @@ From this directory:
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Open <http://127.0.0.1:8000>. One salary and tax page serves every assessment year: it opens on the newest enacted year, and `calc/take-home-salary-tax.html?ya=2025` opens a specific year. Results and the year comparison recalculate as soon as any input changes, so there is no calculate button. Selecting another assessment year retains your entered values and updates the `?ya=` query; reloading starts with the defaults for that year.
+Open <http://127.0.0.1:8000>. One salary and tax page serves every assessment year: it opens on the newest enacted year, and `calc/take-home-salary-tax.html?ya=2025` opens a specific year. Results and the year comparison recalculate as soon as any input changes, so there is no calculate button. Monthly salary also has a slider for quick exploration, which covers RM 1,000 to RM 3,000,000 on a logarithmic scale so ordinary salaries are still easy to reach; the typed amount remains authoritative and may fall outside that range. Selecting another assessment year retains your entered values and updates the `?ya=` query; reloading starts with the defaults for that year.
 
 ## Formatting
 
@@ -41,7 +41,7 @@ npm install --prefix /tmp/ringgit-browser-tests playwright@1.58.2
 PLAYWRIGHT_MODULE=/tmp/ringgit-browser-tests/node_modules/playwright node tests/browser.test.cjs
 ```
 
-Run the local server first. If your OS lacks browser libraries, follow Playwright’s platform dependency setup. `TEST_BASE_URL` overrides the server URL; `TEST_SCREENSHOTS` saves screenshots to a chosen directory. The suite checks all 6 routes at 320, 375, 768 and 1440 pixels, including expanded tables, mobile touch/focus, live recalculation for every control, blur-rounding consistency, the monthly and annual breakdown columns, accessible annual allocation values, zero-income and excess-payment states, the 20-year EPF illustration, the custom select caret, year-specific URLs, updated charts, source links, validation, and retirement results. Mobile emulation verifies browser behavior; physical iOS Safari remains a separate device check.
+Run the local server first. If your OS lacks browser libraries, follow Playwright’s platform dependency setup. `TEST_BASE_URL` overrides the server URL; `TEST_SCREENSHOTS` saves screenshots to a chosen directory. The suite checks all 6 routes at 320, 375, 768 and 1440 pixels, including expanded tables, mobile touch/focus, live recalculation for every control, the salary slider in both directions, blur-rounding consistency, the monthly and annual breakdown columns, accessible annual allocation values, zero-income and excess-payment states, the 20-year EPF illustration, the custom select caret, year-specific URLs, updated charts, source links, validation, and retirement results. Mobile emulation verifies browser behavior; physical iOS Safari remains a separate device check.
 
 ## Published site and PR previews
 
@@ -85,7 +85,7 @@ Preserves the original equal annual withdrawal model: savings stay invested, a f
 - `style.css`: shared responsive design.
 - `calc/main.js`: shared number formatting, navigation/footer and retirement math.
 - `calc/tax-engine.js`: year-specific rules and pure calculations, also importable by Node tests.
-- `calc/tax-app.js`: common tax interface, validation, breakdowns, sources and responsive SVG chart.
+- `calc/tax-app.js`: common tax interface, validation, breakdowns, the salary slider, sources and responsive SVG chart.
 - `calc/retirement-app.js`: retirement interface and validation.
 - `calc/take-home-salary-tax.html`: the single salary and tax page, reading its assessment year from the `?ya=` query.
 

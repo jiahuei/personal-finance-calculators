@@ -236,6 +236,105 @@ async function liveRetirementInputs(page) {
     "change event updates retirement results",
   )
 }
+/** Verifies the salary slider spans RM 1,000 to RM 3,000,000 logarithmically, drives the field and follows typed amounts. */
+async function salarySlider(page, width) {
+  await page.goto(`${baseURL}/${taxRoute}`)
+  const slider = page.locator("#salarySlider")
+  // Recomputed here so these assertions do not merely repeat the application's own helpers.
+  const steps = 2000
+  const positionSalary = (position) => 1000 * 3000 ** (position / steps)
+  const salaryPosition = (value) =>
+    Math.round((steps * Math.log(Math.min(3000000, Math.max(1000, value)) / 1000)) / Math.log(3000))
+  const spendable = (value) => {
+    const step = value < 10000 ? 1 : value < 100000 ? 10 : value < 1000000 ? 100 : 1000
+    return Math.round(value / step) * step
+  }
+  const money = (value) =>
+    new Intl.NumberFormat("en-MY", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value)
+  const state = () =>
+    page.evaluate(() => {
+      const control = document.getElementById("salarySlider")
+      const field = document.getElementById("salary")
+      const box = control.getBoundingClientRect()
+      return {
+        position: control.value,
+        now: control.getAttribute("aria-valuenow"),
+        text: control.getAttribute("aria-valuetext"),
+        amount: field.value,
+        height: box.height,
+        underInput: box.top >= field.getBoundingClientRect().bottom,
+        sameField: control.closest(".field") === field.closest(".field"),
+      }
+    })
+  const initial = await state()
+  check(
+    initial.sameField && initial.underInput,
+    "slider sits under the salary input inside the same field",
+  )
+  check(initial.height >= 24, `slider is a usable touch target (${initial.height}px)`)
+  check(
+    (await slider.getAttribute("aria-label")) === "Monthly salary" &&
+      (await slider.getAttribute("aria-valuemin")) === "1000" &&
+      (await slider.getAttribute("aria-valuemax")) === "3000000",
+    "slider is named and bounded for assistive technology",
+  )
+  check(
+    (await page.locator(".slider-scale").textContent()) === "RM 1,000RM 3,000,000",
+    "the visible scale states both endpoints",
+  )
+  check(
+    Number(initial.position) === salaryPosition(7500) && initial.now === "7500",
+    `slider opens on the default salary (${initial.position}, expected ${salaryPosition(7500)})`,
+  )
+  // Dragging uses viewport coordinates, so bring the slider into view first.
+  await slider.scrollIntoViewIfNeeded()
+  const box = await slider.boundingBox()
+  const beforeDrag = initial.amount
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width * 0.62, box.y + box.height / 2, { steps: 5 })
+  await page.mouse.up()
+  check((await state()).amount !== beforeDrag, "dragging the slider changes the monthly salary")
+  check((await page.locator("#annual-tax").textContent()) !== "—", "dragging recalculates")
+  for (const [position, expected] of [
+    [0, 1000],
+    [steps, 3000000],
+    [Math.round(steps / 2), spendable(positionSalary(steps / 2))],
+  ]) {
+    await slider.evaluate((control, value) => {
+      control.value = String(value)
+      control.dispatchEvent(new Event("input", { bubbles: true }))
+    }, position)
+    const moved = await state()
+    check(
+      moved.amount === money(expected),
+      `${width}: position ${position} enters ${money(expected)}, got ${moved.amount}`,
+    )
+  }
+  await page.locator("#salary").fill("8000")
+  await page.locator("#salary").blur()
+  let typed = await state()
+  check(
+    Number(typed.position) === salaryPosition(8000) &&
+      typed.now === "8000" &&
+      typed.text === "RM 8,000",
+    `typing moves the slider to the matching position (${JSON.stringify(typed)})`,
+  )
+  await page.locator("#salary").fill("5000000")
+  await page.locator("#salary").blur()
+  typed = await state()
+  check(
+    typed.amount === "5,000,000.00" && Number(typed.position) === steps && typed.now === "3000000",
+    `an amount above the range stays in the field while the slider clamps (${JSON.stringify(typed)})`,
+  )
+  const held = typed.position
+  await page.locator("#salary").fill("1,2")
+  check(await page.locator("#form-error").isVisible(), "malformed input still explains itself")
+  check((await state()).position === held, "malformed input leaves the slider put")
+}
 /** Ensures all routes recalculate live, explain the allocation bar and keep touch focus in a real browser. */
 ;(async () => {
   const browser = await chromium.launch({ headless: true })
@@ -377,6 +476,7 @@ async function liveRetirementInputs(page) {
         }
       }
       await liveTaxInputs(page, width)
+      await salarySlider(page, width)
       await liveRetirementInputs(page)
       if (width < 768) {
         await page.goto(`${baseURL}/${taxRoute}`)
@@ -520,7 +620,7 @@ async function liveRetirementInputs(page) {
     }
     check(errors.length === 0, `No runtime or resource errors: ${errors.join("; ")}`)
     console.log(
-      `Passed ${checks} browser assertions across ${routes.length} routes at 320,375,768,1440px, including touch/focus, live recalculation, the monthly and annual breakdown columns, the allocation legend, validation, year-specific URLs, graphs, sources and retirement.`,
+      `Passed ${checks} browser assertions across ${routes.length} routes at 320,375,768,1440px, including touch/focus, live recalculation, the salary slider, the monthly and annual breakdown columns, the allocation legend, validation, year-specific URLs, graphs, sources and retirement.`,
     )
   } finally {
     await browser.close()

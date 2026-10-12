@@ -326,6 +326,20 @@ select {
   padding-left: 14px;
   padding-right: 38px;
 }
+/* The salary slider keeps the native track and thumb, which remain the most reliable touch
+   target across browsers; accent-color is enough to bring it into the palette. */
+.slider {
+  width: 100%;
+  min-height: 32px;
+  margin: 10px 0 0;
+  accent-color: var(--teal);
+}
+.slider-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
 input:focus,
 select:focus {
   border-color: var(--teal);

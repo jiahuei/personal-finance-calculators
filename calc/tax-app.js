@@ -12,9 +12,30 @@ const requestedYear = Number(new URLSearchParams(location.search).get("ya"))
 let selectedYear = TaxEngine.years.includes(requestedYear)
   ? requestedYear
   : TaxEngine.years.filter((year) => !TaxEngine.rules(year).proposed).at(-1)
-function field(id, label, value, unit, help = "", max = "") {
+// A linear track from RM 1,000 to RM 3,000,000 would squeeze every typical salary into the first
+// percent of the slider, so positions map logarithmically across the same two endpoints.
+const salaryRange = { min: 1000, max: 3000000, steps: 2000 }
+function sliderSalary(position) {
+  const { min, max, steps } = salaryRange
+  return min * (max / min) ** (position / steps)
+}
+function salaryPosition(value) {
+  const { min, max, steps } = salaryRange
+  const clamped = Math.min(max, Math.max(min, value))
+  return Math.round((steps * Math.log(clamped / min)) / Math.log(max / min))
+}
+// Dragging should land on spendable amounts: whole ringgit below RM 10,000, then tens, hundreds
+// and thousands, so ordinary salaries are reachable without retyping them.
+function roundSalary(value) {
+  const step = value < 10000 ? 1 : value < 100000 ? 10 : value < 1000000 ? 100 : 1000
+  return Math.round(value / step) * step
+}
+const scaleLabel = (value) =>
+  `RM ${new Intl.NumberFormat("en-MY", { maximumFractionDigits: 0 }).format(value)}`
+const salarySliderHtml = `<input class="slider" id="salarySlider" type="range" min="0" max="${salaryRange.steps}" step="1" aria-label="Monthly salary" aria-valuemin="${salaryRange.min}" aria-valuemax="${salaryRange.max}"><div class="slider-scale" aria-hidden="true"><span>${scaleLabel(salaryRange.min)}</span><span>${scaleLabel(salaryRange.max)}</span></div>`
+function field(id, label, value, unit, help = "", max = "", afterInput = "") {
   const percent = unit === "%" || unit === "months"
-  return `<div class="field"><label for="${id}">${label}</label><div class="input-wrap ${percent ? "percent" : ""}">${!percent ? `<span class="prefix" aria-hidden="true">${unit}</span>` : ""}<input id="${id}" name="${id}" type="text" inputmode="decimal" value="${value}" data-max="${max}" required ${help ? `aria-describedby="${id}Help"` : ""}>${percent ? `<span class="suffix" aria-hidden="true">${unit}</span>` : ""}</div>${help ? `<p class="help" id="${id}Help">${help}</p>` : ""}</div>`
+  return `<div class="field"><label for="${id}">${label}</label><div class="input-wrap ${percent ? "percent" : ""}">${!percent ? `<span class="prefix" aria-hidden="true">${unit}</span>` : ""}<input id="${id}" name="${id}" type="text" inputmode="decimal" value="${value}" data-max="${max}" required ${help ? `aria-describedby="${id}Help"` : ""}>${percent ? `<span class="suffix" aria-hidden="true">${unit}</span>` : ""}</div>${afterInput}${help ? `<p class="help" id="${id}Help">${help}</p>` : ""}</div>`
 }
 el("main").insertAdjacentHTML(
   "beforeend",
@@ -33,7 +54,7 @@ el("main").insertAdjacentHTML(
         "",
       )}</select><p class="help">The year you earn the income, usually filed in the following year.</p></div>
     <div class="notice" id="proposal-notice" ${selectedYear !== 2027 ? "hidden" : ""}><strong>YA 2027 · Budget proposal</strong><br>Models proposed RM 12,000 personal relief, 18% and 24% bands and 30% above RM 1 million. Other rules are carried forward pending legislation and final HASiL guidance. <a href="${source.budget2027}">Budget 2027 speech ↗</a></div>
-    <fieldset class="form-section"><legend>Income</legend><div class="field-grid">${field("salary", "Monthly salary", "7,500.00", "RM", "Include taxable fixed allowances.")}${field("bonus", "Annual bonus", "0.00", "months", "Bonus as a multiple of monthly salary.")}</div></fieldset>
+    <fieldset class="form-section"><legend>Income</legend><div class="field-grid">${field("salary", "Monthly salary", "7,500.00", "RM", "Include taxable fixed allowances; drag the slider or type an exact amount.", "", salarySliderHtml)}${field("bonus", "Annual bonus", "0.00", "months", "Bonus as a multiple of monthly salary.")}</div></fieldset>
     <fieldset class="form-section"><legend>Contributions</legend><div class="field-grid">${field("employeeRate", "Employee EPF rate", "11.00", "%", "Use your actual average rate for this year.", 100)}${field("employerRate", "Employer EPF rate", "12.00", "%", "Use your employer’s applicable rate.", 100)}</div><label class="check-row"><input id="social" type="checkbox" checked> Include employee SOCSO &amp; EIS (under 60)</label><p class="help">Uses the standard employee bands and excludes optional LINDUNG 24 Jam. EPF is estimated on salary and bonus, and historical rates may vary within a year.</p></fieldset>
     <fieldset class="form-section"><legend>Annual tax reliefs</legend><div class="field-grid">${field("prs", "PRS / deferred annuity paid", "0.00", "RM", "Enter the full annual payment; the relief is capped at RM 3,000.")}${field("otherReliefs", "Other eligible reliefs", "0.00", "RM", "Personal, EPF, PRS and SOCSO/EIS reliefs are added automatically, so enter only your remaining reliefs here, such as lifestyle, medical or childcare.")}</div><p class="help">Check each year’s limits in the <a href="${source.reliefs}">HASiL relief guide ↗</a>.</p></fieldset>
     <label class="check-row"><input id="ignoreReliefs" type="checkbox"> Compare without tax reliefs or the personal rebate</label>
@@ -55,6 +76,24 @@ for (const key of numericKeys) {
     return value.trim() && Number.isFinite(parsed) && parsed >= 0 ? fmt(parsed) : value
   })
 }
+const salaryInput = el("salary")
+const salarySlider = el("salarySlider")
+// The typed amount stays authoritative, so only the text field syncs the slider. Syncing inside
+// update() would fight a drag, because rounding the dragged amount can move the position a step.
+function syncSalarySlider() {
+  const parsed = parseNonNegativeNumber(salaryInput.value)
+  if (!Number.isFinite(parsed)) return
+  const clamped = Math.min(salaryRange.max, Math.max(salaryRange.min, parsed))
+  salarySlider.value = String(salaryPosition(clamped))
+  salarySlider.setAttribute("aria-valuenow", String(Math.round(clamped)))
+  salarySlider.setAttribute("aria-valuetext", scaleLabel(clamped))
+}
+for (const event of ["input", "change", "blur"])
+  salaryInput.addEventListener(event, syncSalarySlider)
+salarySlider.addEventListener("input", () => {
+  salaryInput.value = fmt(roundSalary(sliderSalary(Number(salarySlider.value))))
+  update()
+})
 function readInput() {
   const input = {}
   for (const key of numericKeys) {
@@ -241,6 +280,7 @@ for (const key of numericKeys) {
   for (const event of ["input", "change", "blur"]) el(key).addEventListener(event, update)
 }
 applyYearToPage()
+syncSalarySlider()
 update()
 
 if (typeof ResizeObserver !== "undefined") {

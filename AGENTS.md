@@ -15,7 +15,7 @@ The user's job as a senior software engineer is dependent on you implementing cl
 ├── img/               # Project photographs
 ├── tests/             # Node calculation and optional Playwright browser tests
 ├── scripts/           # Pages snapshot packaging, comments and runtime-path configuration
-├── tasks/             # Plans and dated completion records
+├── tasks/             # Local, untracked plans and dated completion records
 ├── .github/workflows/ # Formatting checks and Pages production/PR deployments
 ├── package.json       # Pinned development-only formatting dependency
 ├── .prettierrc.json    # Formatting configuration
@@ -61,6 +61,7 @@ The user's job as a senior software engineer is dependent on you implementing cl
 
 ### 3. Task Tracking
 
+- `tasks/` is ignored by Git, so plans, completion records and lessons stay local and out of review. Never commit them; the pull request description carries the same content.
 - Use `tasks/todo.md` for substantial, multi-stage work when persistent tracking is useful.
 - Do not create or modify `tasks/todo.md` for small or routine changes; the completion record below is still required.
 - At the end of every feature, bug fix, or task, before the final handoff, create `tasks/YYYY-MM-DD-<task-name>.md`. Use the completion date and a short, descriptive, lowercase task name with hyphens.

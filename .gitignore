@@ -1,6 +1,9 @@
 # Internal references
 __ref__/
 
+# Local task records
+tasks/
+
 # Development dependencies
 node_modules/
 _site/

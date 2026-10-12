@@ -254,6 +254,9 @@ async function salarySlider(page, width) {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(value)
+  // Mirrors the application's scaleLabel, which announces whole ringgit to assistive technology.
+  const whole = (value) =>
+    new Intl.NumberFormat("en-MY", { maximumFractionDigits: 0 }).format(value)
   const state = () =>
     page.evaluate(() => {
       const control = document.getElementById("salarySlider")
@@ -301,7 +304,7 @@ async function salarySlider(page, width) {
   check(dragged.amount !== beforeDrag, "dragging the slider changes the monthly salary")
   check(
     dragged.amount === money(Number(dragged.now)) &&
-      dragged.text === `RM ${new Intl.NumberFormat("en-MY").format(Number(dragged.now))}`,
+      dragged.text === `RM ${whole(Number(dragged.now))}`,
     "dragging updates both accessible salary values to match the field",
   )
   check((await page.locator("#annual-tax").textContent()) !== "—", "dragging recalculates")
@@ -316,7 +319,7 @@ async function salarySlider(page, width) {
     check(
       keyed.amount === money(expected) &&
         keyed.now === String(expected) &&
-        keyed.text === `RM ${new Intl.NumberFormat("en-MY").format(expected)}`,
+        keyed.text === `RM ${whole(expected)}`,
       `${key} updates the salary and both accessible values`,
     )
   }
@@ -334,7 +337,7 @@ async function salarySlider(page, width) {
       Number(moved.position) === position &&
         moved.amount === money(expected) &&
         moved.now === String(expected) &&
-        moved.text === `RM ${new Intl.NumberFormat("en-MY").format(expected)}`,
+        moved.text === `RM ${whole(expected)}`,
       `${width}: position ${position} enters ${money(expected)}, got ${moved.amount}`,
     )
   }
@@ -354,10 +357,15 @@ async function salarySlider(page, width) {
     typed.amount === "5,000,000.00" && Number(typed.position) === steps && typed.now === "3000000",
     `an amount above the range stays in the field while the slider clamps (${JSON.stringify(typed)})`,
   )
-  const held = typed.position
+  // The clamp above is the baseline: an unparsable amount must leave the thumb and both
+  // accessible values at that last valid amount, not merely leave the thumb alone.
   await page.locator("#salary").fill("1,2")
   check(await page.locator("#form-error").isVisible(), "malformed input still explains itself")
-  check((await state()).position === held, "malformed input leaves the slider put")
+  const stale = await state()
+  check(
+    stale.position === typed.position && stale.now === typed.now && stale.text === typed.text,
+    `malformed input leaves the slider and its accessible values put (${JSON.stringify(stale)})`,
+  )
 }
 /** Ensures all routes recalculate live, explain the allocation bar and keep touch focus in a real browser. */
 ;(async () => {

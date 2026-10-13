@@ -4,23 +4,9 @@ This `AGENTS.md` file provides comprehensive guidance for OpenAI Codex, Claude C
 
 The user's job as a senior software engineer is dependent on you implementing clean code with elegant architecture.
 
-## Repository Structure
+## Implementation Specification
 
-```text
-.
-├── index.html         # Calculator home page
-├── photo-credits.html # Image attribution
-├── style.css          # Shared responsive styling
-├── calc/              # Calculator pages, applications and calculation engine
-├── img/               # Project photographs
-├── tests/             # Node calculation and optional Playwright browser tests
-├── scripts/           # Pages snapshot packaging, comments and runtime-path configuration
-├── tasks/             # Local, untracked plans and dated completion records
-├── .github/workflows/ # Formatting checks and Pages production/PR deployments
-├── package.json       # Pinned development-only formatting dependency
-├── .prettierrc.json    # Formatting configuration
-└── README.md          # Local setup, tests and calculation assumptions
-```
+Read [SPEC.md](SPEC.md) before changing calculator behavior, application structure or Pages deployment. It defines the implementation contracts, calculation assumptions and deployment invariants. Preserve those contracts unless the requested change explicitly updates them, and update the specification when behavior changes.
 
 ## Core Principles
 
@@ -86,15 +72,12 @@ The user's job as a senior software engineer is dependent on you implementing cl
 
 #### Local development environment
 
-- This is a static HTML/CSS/JavaScript site with no build step or runtime dependencies.
 - Serve it from the repository root: `python3 -m http.server 8000 --bind 127.0.0.1`.
 - Run calculation and input-validation tests: `node --test tests/calculators.test.js`.
 - Run Pages packaging/comment regression tests: `node --test tests/pages-preview.test.cjs`. These tests spawn Git for isolated synthetic repositories; use permissions that allow subprocesses if the sandbox restricts them.
 - If child processes are restricted, use `node tests/calculators.test.js`, or `node --test --test-isolation=none tests/calculators.test.js` with a recent Node release.
 - For changes affecting browser behavior or layout, follow the optional Playwright setup in [README.md](README.md#tests) and run `node tests/browser.test.cjs` with the documented module path and local server.
 - Inspect relevant desktop and mobile screenshots for layout changes. Distinguish browser mobile emulation from physical-device verification.
-- `.github/workflows/pages.yml` deploys current remote main at the site root and open same-repository PR snapshots under `pr-preview/<number>/`. Preserve that separation, copy only configured runtime regular blobs, and do not execute application build scripts from preview sources. Fork PR previews are excluded.
-- Publish preview comments only after successful deployment. Rebuild from current refs and reconcile closed-preview comments on each successful run, since a newer queued Pages event can replace an earlier close event. `_site/` is generated output.
 
 Before reporting completion, review the final diff and ask:
 
